@@ -1,10 +1,7 @@
-# RecoveryJpeg
-
 ## Author
 Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
 
 ## Usage
-### Recovery Jpeg
 - Using Header
   - None (Use when the image has incorrect pixels)
 ![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
