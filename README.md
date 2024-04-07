@@ -6,6 +6,11 @@ Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
   - None (Use when the image has incorrect pixels)
 ![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
 
+- Image -> Export Folder
+  - Export Folder (Extract all found jpeg)
+  ![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/6c422fa6-3dc0-4e82-8bb2-3d720f44064f)
+
+
 ## Information
 Sample file: [DPReview](https://www.dpreview.com/products/canon/slrs/canon_eos5dmkiv/sample-photos)
 
