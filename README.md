@@ -8,7 +8,8 @@ Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
 
 - Image -> Export Folder
   - Export Folder (Extract all found jpeg)
-  ![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/6c422fa6-3dc0-4e82-8bb2-3d720f44064f)
+![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/a6c26bdb-e499-4b67-b73a-033f684c9dfb)
+
 
 
 ## Information
