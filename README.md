@@ -15,6 +15,5 @@ Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
 ## Information
 Sample file: [DPReview](https://www.dpreview.com/products/canon/slrs/canon_eos5dmkiv/sample-photos)
 
-## Donation
-If this software helped you please consider donating [here](https://www.Paypal.me/BSVPay) or  BIDV: 63110001165789 !\
-Donations will encourage me to keep working on this software,To develop more tools, leading to more media being supported and better recovered files.
+## 💰You can help me by Donating
+[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/BSVPay)
