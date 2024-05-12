@@ -1,3 +1,6 @@
+## Software
+You can use it with photos encrypted by ransomware, unclear photo structures, and other cases.
+
 ## Author
 Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
 
