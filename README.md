@@ -9,9 +9,18 @@ Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
   - None (Use when the image has incorrect pixels)
 ![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
 
+- File -> Using Header -> x25805
+  - x25805 (Used in case of ransomware)
+![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/f5ce67bf-cf5e-4fc0-be63-7f1bac02c762)
+
 - Image -> Export Folder
   - Export Folder (Extract all found jpeg)
 ![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/a6c26bdb-e499-4b67-b73a-033f684c9dfb)
+
+- Image -> Edit Image
+  - Edit Image (Y, Cr, Cb - ins or del block)
+![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/bf86bfa1-cf24-49dc-800c-2290e8a2f76b)
+
 
 
 
