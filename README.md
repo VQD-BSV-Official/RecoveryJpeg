@@ -22,10 +22,8 @@ Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
 ![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/bf86bfa1-cf24-49dc-800c-2290e8a2f76b)
 
 
-
-
 ## Information
-Sample file: [DPReview](https://www.dpreview.com/products/canon/slrs/canon_eos5dmkiv/sample-photos)
+[DPReview](https://www.dpreview.com/products/canon/slrs/canon_eos5dmkiv/sample-photos) | [JpegRepair](https://github.com/dmahurin/jpegrepair) | 
 
 ## 💰You can help me by Donating
 [![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/BSVPay)
