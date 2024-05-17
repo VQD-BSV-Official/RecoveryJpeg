@@ -5,7 +5,7 @@ You can use it with photos encrypted by ransomware, unclear photo structures, an
 2. 5 star rating & inbox fanpage: https://www.facebook.com/BSVRecovery
 
 Once completed, take a photo of your donation information, rate it 5 stars, and I'll send you the key. <br>
-😊 WHEN YOU DONATE, MONEY WILL SUPPORT DIFFICULT SITUATIONS AND USEFUL ACTIONS FOR THE COMMUNITY
+😊 MONEY WILL SUPPORT DIFFICULT SITUATIONS AND USEFUL ACTIONS FOR THE COMMUNITY
 
 ## Author
 Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
