@@ -20,6 +20,10 @@ Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
   - x25805 (Used in case of ransomware)
 ![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/f5ce67bf-cf5e-4fc0-be63-7f1bac02c762)
 
+- File -> Using Header -> File RAW
+  - File RAW (CR2, NEF, ARW)
+![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/b447de08-bcfe-4961-8274-5ddccad99926)
+
 - Image -> Export Folder
   - Export Folder (Extract all found jpeg)
 ![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/a6c26bdb-e499-4b67-b73a-033f684c9dfb)
