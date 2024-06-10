@@ -38,13 +38,13 @@ class Ui_Create_New(object):
         font.setBold(True)
         self.b_Save_2.setFont(font)
         self.b_Save_2.setObjectName("b_Save_2")
-        self.b_Save_3 = QtWidgets.QPushButton(parent=Create_New)
-        self.b_Save_3.setGeometry(QtCore.QRect(290, 190, 75, 26))
+        self.b_OK = QtWidgets.QPushButton(parent=Create_New)
+        self.b_OK.setGeometry(QtCore.QRect(290, 190, 75, 26))
         font = QtGui.QFont()
         font.setPointSize(10)
         font.setBold(True)
-        self.b_Save_3.setFont(font)
-        self.b_Save_3.setObjectName("b_Save_3")
+        self.b_OK.setFont(font)
+        self.b_OK.setObjectName("b_OK")
         self.b_Save_4 = QtWidgets.QPushButton(parent=Create_New)
         self.b_Save_4.setGeometry(QtCore.QRect(370, 190, 75, 26))
         font = QtGui.QFont()
@@ -58,7 +58,7 @@ class Ui_Create_New(object):
 
     def retranslateUi(self, Create_New):
         _translate = QtCore.QCoreApplication.translate
-        Create_New.setWindowTitle(_translate("Create_New", "BSV Recovery - Create"))
+        Create_New.setWindowTitle(_translate("Create_New", "Prototype"))
         self.checkBox.setText(_translate("Create_New", "The file encrypted by ransomware - x25805"))
         __sortingEnabled = self.listWidget.isSortingEnabled()
         self.listWidget.setSortingEnabled(False)
@@ -67,5 +67,5 @@ class Ui_Create_New(object):
         self.listWidget.setSortingEnabled(__sortingEnabled)
         self.b_Save.setText(_translate("Create_New", "+"))
         self.b_Save_2.setText(_translate("Create_New", "-"))
-        self.b_Save_3.setText(_translate("Create_New", "OK"))
+        self.b_OK.setText(_translate("Create_New", "OK"))
         self.b_Save_4.setText(_translate("Create_New", "Cancel"))

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>BSV Recovery - Create</string>
+   <string>Prototype</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -83,7 +83,7 @@
     <string>-</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="b_Save_3">
+  <widget class="QPushButton" name="b_OK">
    <property name="geometry">
     <rect>
      <x>290</x>

@@ -116,7 +116,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "BSV Recovery - RecoveryJpeg v1.2.0"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "BSV Recovery - RecoveryJpeg v1.3.0"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuOpen.setTitle(_translate("MainWindow", "Open"))
         self.menuUsing_Header.setTitle(_translate("MainWindow", "Using Header"))

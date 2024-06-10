@@ -122,7 +122,7 @@ class Ui_Edit_Image(object):
 
     def retranslateUi(self, Edit_Image):
         _translate = QtCore.QCoreApplication.translate
-        Edit_Image.setWindowTitle(_translate("Edit_Image", "BSV Recovery - Edit Image"))
+        Edit_Image.setWindowTitle(_translate("Edit_Image", "Edit Image"))
         self.groupBox.setTitle(_translate("Edit_Image", "Options"))
         self.label_3.setText(_translate("Edit_Image", "Cr"))
         self.label_2.setText(_translate("Edit_Image", "Y"))
