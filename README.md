@@ -33,6 +33,11 @@ Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
 ![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/bf86bfa1-cf24-49dc-800c-2290e8a2f76b)
 
 
+- Image -> Create New
+  - Create New (Automatic size)
+![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/fb904d92-ebb2-421d-b5d6-a714a18640a0)
+
+
 ## Information
 [DPReview](https://www.dpreview.com/products/canon/slrs/canon_eos5dmkiv/sample-photos) | [JpegRepair](https://github.com/dmahurin/jpegrepair) | [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp)
 
