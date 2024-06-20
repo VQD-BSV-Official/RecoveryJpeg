@@ -1,7 +1,7 @@
 ## Software
 You can use it with photos encrypted by ransomware, unclear photo structures, and other cases. <br>
 
-🤔 HOW TO GET KEY - [RecoveryJpeg_v1.3.0](https://github.com/VQD-BSV/RecoveryJpeg/releases/tag/RecoveryJpeg_v1.3.0) version doesn't require a key
+🤔 [RecoveryJpeg_v1.3.0](https://github.com/VQD-BSV/RecoveryJpeg/releases/tag/RecoveryJpeg_v1.3.0) version doesn't require a key
 1. Donate 5 USD & or more:  https://www.Paypal.me/BSVPay
 2. 5 star rating & inbox fanpage: https://www.facebook.com/BSVRecovery
 
