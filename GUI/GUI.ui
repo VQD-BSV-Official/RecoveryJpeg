@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>BSV Recovery - RecoveryJpeg v1.3.0</string>
+   <string>BSV Recovery - RecoveryJpeg v1.3.2</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -114,6 +114,7 @@
     </widget>
     <addaction name="menuOpen"/>
     <addaction name="menuUsing_Header"/>
+    <addaction name="Restart_Software"/>
    </widget>
    <widget class="QMenu" name="menuImage">
     <property name="title">
@@ -129,7 +130,7 @@
     <property name="title">
      <string>Help</string>
     </property>
-    <addaction name="Key"/>
+    <addaction name="About"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
@@ -206,9 +207,9 @@
     <string>Ctrl+E</string>
    </property>
   </action>
-  <action name="Key">
+  <action name="About">
    <property name="text">
-    <string>Registration</string>
+    <string>About</string>
    </property>
   </action>
   <action name="actionCanon_RAW_CR2">
@@ -255,6 +256,11 @@
   <action name="actionOpen_Disk">
    <property name="text">
     <string>Disk</string>
+   </property>
+  </action>
+  <action name="Restart_Software">
+   <property name="text">
+    <string>Restart Software</string>
    </property>
   </action>
  </widget>
