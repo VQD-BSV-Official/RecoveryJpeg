@@ -102,7 +102,7 @@
     <string>OK</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="b_Save_4">
+  <widget class="QPushButton" name="b_Cancel">
    <property name="geometry">
     <rect>
      <x>370</x>
@@ -119,6 +119,19 @@
    </property>
    <property name="text">
     <string>Cancel</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>190</y>
+     <width>151</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Skip thumbnail</string>
    </property>
   </widget>
  </widget>

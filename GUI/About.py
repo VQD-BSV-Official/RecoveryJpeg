@@ -23,7 +23,7 @@ class Ui_About(object):
         self.label.setScaledContents(True)
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(parent=About)
-        self.label_2.setGeometry(QtCore.QRect(110, 36, 191, 41))
+        self.label_2.setGeometry(QtCore.QRect(110, 36, 241, 41))
         font = QtGui.QFont()
         font.setPointSize(14)
         font.setBold(True)
@@ -53,7 +53,7 @@ class Ui_About(object):
     def retranslateUi(self, About):
         _translate = QtCore.QCoreApplication.translate
         About.setWindowTitle(_translate("About", "About"))
-        self.label_2.setText(_translate("About", "RecoveryJpeg v1.3.2"))
+        self.label_2.setText(_translate("About", "RecoveryJpeg v1.4.0 beta"))
         self.label_3.setText(_translate("About", "Developed by: Vũ Quang Đại"))
         self.textBrowser.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"
