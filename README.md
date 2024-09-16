@@ -1,8 +1,9 @@
-## Software
-You can use it with photos encrypted by ransomware, unclear photo structures, and other cases.
+## ***Developed by Vũ Quang Đại / <BSVRecovery.vn@gmail.com>***
+Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure.
 
-## Author
-Developed by Vu Quang Dai <BSVRecovery.vn@gmail.com>
+If you can not fix, please send me a broken file and good sample file (if any), please upload to drive, mega ..etc. <br>
+and send the link to my gmail. And if successful, this is not free.
+
 
 ## Usage
 - File -> Using Header -> None ~ [Video here](https://www.youtube.com/watch?v=0OUbORvWM_k)
