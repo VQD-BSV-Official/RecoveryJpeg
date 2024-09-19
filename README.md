@@ -1,6 +1,5 @@
 ## ***Developed by Vũ Quang Đại / <BSVRecovery.vn@gmail.com>***
-Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure.<br>
-I learned how to repair corrupted images in more depth, I learned from the sources: [JpegRepair](https://github.com/dmahurin/jpegrepair), [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp)
+Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure. I learned how to repair corrupted images in more depth, I learned from the sources: [JpegRepair](https://github.com/dmahurin/jpegrepair), [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp)
 
 If you can not fix, please send me a broken file and good sample file (if any), please upload to drive, mega ..etc. <br>
 and send the link to my gmail. And if successful, this is not free.
