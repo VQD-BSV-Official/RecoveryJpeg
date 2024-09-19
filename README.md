@@ -1,5 +1,6 @@
 ## ***Developed by Vũ Quang Đại / <BSVRecovery.vn@gmail.com>***
-Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure.
+Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure.<br>
+I learned how to repair corrupted images in more depth, I learned from the sources: [JpegRepair](https://github.com/dmahurin/jpegrepair), [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp)
 
 If you can not fix, please send me a broken file and good sample file (if any), please upload to drive, mega ..etc. <br>
 and send the link to my gmail. And if successful, this is not free.
@@ -12,28 +13,25 @@ and send the link to my gmail. And if successful, this is not free.
 
 - File -> Using Header -> x25805
   - x25805 (Used in case of ransomware)
-![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/f5ce67bf-cf5e-4fc0-be63-7f1bac02c762)
 
 - File -> Using Header -> File RAW
   - File RAW (CR2, NEF, ARW)
-![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/b447de08-bcfe-4961-8274-5ddccad99926)
 
 - Image -> Export Folder
   - Export Folder (Extract all found jpeg)
-![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/a6c26bdb-e499-4b67-b73a-033f684c9dfb)
 
 - Image -> Edit Image
   - Edit Image (Y, Cr, Cb - ins or del block)
-![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/bf86bfa1-cf24-49dc-800c-2290e8a2f76b)
-
 
 - Image -> Create New
   - Create New (Automatic size)
-![image](https://github.com/VQD-BSV/RecoveryJpeg/assets/127699283/fb904d92-ebb2-421d-b5d6-a714a18640a0)
 
 
-## Information
-[DPReview](https://www.dpreview.com/products/canon/slrs/canon_eos5dmkiv/sample-photos) | [JpegRepair](https://github.com/dmahurin/jpegrepair) | [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp)
+> [!Note]
+> * Using Python 3.12.4 or > Python 3.9
+> * Recommended to run on Windows, instead of Linux.
+> * Good sample file. The file must be the same device or software. <br>
+> The same parameters (Image resolution, device).
 
-## 💰You can help me by Donating
-[![PayPal](https://img.shields.io/badge/PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/BSVPay)
+> [!Important]
+> **Donate**: [Do consider donating or buying us a coffee](https://paypal.me/BSVPay)
