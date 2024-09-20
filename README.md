@@ -6,24 +6,15 @@ and send the link to my gmail. And if successful, this is not free.
 
 
 ## Usage
-- File -> Using Header -> None ~ [Video here](https://www.youtube.com/watch?v=0OUbORvWM_k)
-  - None (Use when the image has incorrect pixels)
+- File -> Using Header -> None (Use when the image has incorrect pixels) [Video here](https://www.youtube.com/watch?v=0OUbORvWM_k) 
 ![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
 
-- File -> Using Header -> x25805
-  - x25805 (Used in case of ransomware)
-
-- File -> Using Header -> File RAW
-  - File RAW (CR2, NEF, ARW)
-
-- Image -> Export Folder
-  - Export Folder (Extract all found jpeg)
-
-- Image -> Edit Image
-  - Edit Image (Y, Cr, Cb - ins or del block)
-
-- Image -> Create New
-  - Create New (Automatic size)
+> [!Tip]
+> * File -> Using Header -> x25805 (Used in case of ransomware)
+> * File -> Using Header -> File RAW (CR2, NEF, ARW)
+> * Image -> Export Folder (Extract all found jpeg)
+> * Image -> Edit Image (Y, Cr, Cb - ins or del block)
+> * Image -> Create New (Automatic size)
 
 
 > [!Note]
