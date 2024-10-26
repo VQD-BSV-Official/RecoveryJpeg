@@ -23,7 +23,7 @@ and send the link to my gmail. And if successful, this is not free.
 
 > [!Note]
 > * Using Python 3.12.4 or > Python 3.9
-> * Recommended to run on Windows, instead of Linux.
+> * Recommended to run on Windows, instead of MacOS ,Linux...
 > * Good sample file. The file must be the same device or software. <br>
 > The same parameters (Image resolution, device).
 
