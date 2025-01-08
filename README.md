@@ -23,10 +23,7 @@ and send the link to my gmail. And if successful, this is not free.
 > * Good sample file. The file must be the same device or software. <br>
 > The same parameters (Image resolution, device).
 
-* MacOS
-```
-wine "name software"
-```
+> * MacOS - Wine (wine staging) ```wine "name software"```
 
 > [!Important]
 > **Donate**: [Do consider donating or buying us a coffee](https://paypal.me/BSVPay)
