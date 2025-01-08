@@ -6,11 +6,7 @@ and send the link to my gmail. And if successful, this is not free.
 
 
 ## Usage
-<!-- BEGIN YOUTUBE-CARDS -->
 
-<!-- END YOUTUBE-CARDS -->
-
-- 
 ![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
 
 > [!Tip]
@@ -21,12 +17,16 @@ and send the link to my gmail. And if successful, this is not free.
 > * Image -> Edit Image (Y, Cr, Cb - ins or del block)
 > * Image -> Create New (Automatic size)
 
-
 > [!Note]
 > * Using Python 3.12.4 or > Python 3.9
 > * Recommended to run on Windows, instead of MacOS ,Linux...
 > * Good sample file. The file must be the same device or software. <br>
 > The same parameters (Image resolution, device).
+
+* MacOS
+```
+wine "name software"
+```
 
 > [!Important]
 > **Donate**: [Do consider donating or buying us a coffee](https://paypal.me/BSVPay)
