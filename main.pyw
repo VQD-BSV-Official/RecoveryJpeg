@@ -16,11 +16,6 @@ class MainWindow:
         self.uic = Ui_MainWindow()
         self.uic.setupUi(self.main_win)
 
-        # Label copyright - N10T10_2024
-        # self.uic.label_Copyright.setText('Author & Developed by: <a href="https://www.facebook.com/QuangDaiVQD">Vũ Quang Đại</a>')
-        # self.uic.label_Copyright.setOpenExternalLinks(True)
-        # self.uic.label_Copyright.linkActivated.connect(lambda link: QDesktopServices.openUrl(QUrl(link)))
-
         # Open File, Folder - N10T10_2024
         self.uic.Open_File.triggered.connect(self.open_file)
         self.uic.Open_Folder.triggered.connect(self.open_folder)
@@ -91,27 +86,6 @@ class MainWindow:
                         else:
                             continue
 
-
-        # OLD VERSION
-            # with open(self.image, "rb") as file:
-            #     data = file.read()
-
-            #     # Danh sách các loại marker
-            #     markers = [b"\xFF\xDB\x00\x84", b"\xFF\xDB\x00\x43"]
-            #     end_marker = b"\xFF\xD9"
-
-            #     for marker in markers:
-            #         start_offset = data.find(marker)
-
-            #         while start_offset != -1:
-            #             end_offset = data.find(end_marker, start_offset)
-            #             if end_offset != -1:
-
-            #                 # ADD List
-            #                 self.uic.listWidget.addItem(f"{str(start_offset)}x{str(end_offset)}")
-            #                 start_offset = data.find(marker, end_offset)
-            #             else:
-            #                 break
 
 # ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     # Status - N12T1_25
