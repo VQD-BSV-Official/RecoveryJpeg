@@ -1,6 +1,8 @@
 ## ***Developed by Vũ Quang Đại / <BSVRecovery.vn@gmail.com>***
 > [!Warning]
-> Please respect copyright, I created this software without any cost or support. DO NOT STEAL THE CODE AND MAKE IT YOURS, WHILE EVERYTHING IS BUILT BY ME. For example: edit Author & Developed by: Vu Quang Dai to your name, I know open source you can edit everything, but I want respect for the effort I put in. **CAN BE ADDED**
+> Please respect copyright, I created this software without any cost or support. DO NOT STEAL THE CODE AND MAKE IT YOURS, WHILE EVERYTHING IS BUILT BY ME. For example: edit Author & Developed by: Vu Quang Dai to your name, I know open source you can edit everything, but I want respect for the effort I put in.
+> 
+> **CAN BE ADDED**
 > * "Building upon existing code": Building upon existing source code.
 > * "Modifying" or "customizing": Changing or customizing the source code.
 > * "Repurposing": Reusing the source code for another purpose.
@@ -12,7 +14,6 @@ and send the link to my gmail. And if successful, this is not free.
 
 
 ## Usage
-
 ![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
 
 > [!Tip]
