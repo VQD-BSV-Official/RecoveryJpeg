@@ -5,10 +5,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 
-from GUI.GUI import Ui_MainWindow
-from GUI.About import Ui_About
-from GUI.Create import Ui_Create_New
-from GUI.Edit_Image import Ui_Edit_Image
+from GUI.Sreen.GUI import Ui_MainWindow
+from GUI.Widget.About import Ui_About
+from GUI.Widget.Create import Ui_Create_New
+from GUI.Widget.Edit_Image import Ui_Edit_Image
 
 class MainWindow:
     def __init__(self):
