@@ -1,6 +1,6 @@
 ## ***Developed by Vũ Quang Đại / <BSVRecovery.vn@gmail.com>***
 > [!Warning]
-> Please respect copyright, I created this software without any cost or support. **DO NOT STEAL THE CODE AND MAKE IT YOURS, WHILE EVERYTHING IS BUILT BY ME**. For example: edit Author & Developed by: Vu Quang Dai to your name, I know open source you can edit everything, but I want respect for the effort I put in.
+> Please respect copyright, I created this software without any cost or support. ***DO NOT STEAL THE CODE AND MAKE IT YOURS, WHILE EVERYTHING IS BUILT BY ME***. For example: edit Author & Developed by: Vu Quang Dai to your name, I know open source you can edit everything, but I want respect for the effort I put in.
 >
 > **CAN BE ADDED**
 > * "Building upon existing code": Building upon existing source code.
