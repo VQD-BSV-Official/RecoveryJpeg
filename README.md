@@ -23,7 +23,7 @@ Recover your precious photos. There are 3 ways to repair: Extract thumbnails, re
 > * Image -> Create New (Automatic size)
 
 > [!Note]
-> * Using Python 3.12.4 or > Python 3.9
+> * Using Python 3.12.4 or > Python 3.9 & GUI 6.5.3
 > * Recommended to run on Windows, instead of MacOS ,Linux...
 > * Good sample file. The file must be the same device or software. <br>
 > The same parameters (Image resolution, device).
