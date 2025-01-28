@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>875</width>
-    <height>600</height>
+    <width>1129</width>
+    <height>744</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,18 +26,23 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>191</width>
-      <height>371</height>
+      <width>261</width>
+      <height>471</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
     </property>
    </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>280</x>
       <y>10</y>
-      <width>651</width>
-      <height>371</height>
+      <width>831</width>
+      <height>471</height>
      </rect>
     </property>
     <property name="cursor">
@@ -66,7 +71,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>530</y>
+      <y>680</y>
       <width>281</width>
       <height>21</height>
      </rect>
@@ -74,7 +79,7 @@
     <property name="font">
      <font>
       <family>Segoe UI</family>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
       <bold>true</bold>
      </font>
     </property>
@@ -86,10 +91,15 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>390</y>
-      <width>851</width>
-      <height>131</height>
+      <y>490</y>
+      <width>1111</width>
+      <height>181</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>10</pointsize>
+     </font>
     </property>
    </widget>
   </widget>
@@ -98,7 +108,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>875</width>
+     <width>1129</width>
      <height>22</height>
     </rect>
    </property>
