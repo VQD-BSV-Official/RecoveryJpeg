@@ -152,8 +152,9 @@ class MainWindow:
                 self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
 
                 with open(self.image, "rb") as file:
-                    data = file.read()
-                    cropped_data = data[self.start:self.end + 2]
+                    file.seek(self.start) # Thay vì đọc cả file di chỏ đến offset
+                    data = file.read(self.end - self.start)
+                    cropped_data = data
 
                 if b"\xFF\xDB\x00\x84" in cropped_data:
                     fr0mh3x = 'FFDB0084'
@@ -179,6 +180,8 @@ class MainWindow:
         self.uic.label.clear()
 
         if self.image != "":
+            self.status("Read Folder")
+
             self.delete()
             # Read folder
             for i in os.listdir(self.image):
@@ -194,12 +197,13 @@ class MainWindow:
 
     # Open File - N10T10_2024
     def open_file(self):
-        self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;RAW files (*.CR2 *.NEF *.ARW);;All files (*)')[0]
+        self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;JPEG files (*.JPEG *.JPG);;All files (*)')[0]
         # Reset list & label
         self.uic.listWidget.clear()
         self.uic.label.clear()
 
         if self.image != "":
+            self.status("Read File")
             # Set name file & log
             self.status(os.path.basename(self.image))
             self.uic.textEdit.append(f'📂 Open File: {self.image}')
