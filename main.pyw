@@ -3,7 +3,7 @@ import sys, os, subprocess, binascii
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QSizePolicy
 
 from Lab.Read_Data import read_data
 
@@ -17,6 +17,10 @@ class MainWindow:
         self.main_win = QMainWindow()
         self.uic = Ui_MainWindow()
         self.uic.setupUi(self.main_win)
+
+
+        self.uic.splitter.setStretchFactor(1, 3) 
+        self.uic.splitter_2.setStretchFactor(0, 1) 
 
         # Open File, Folder - N10T10_2024
         self.uic.Open_File.triggered.connect(self.open_file)
