@@ -1,13 +1,8 @@
 ## ***Developed by Vũ Quang Đại / <BSVRecovery.vn@gmail.com>***
 > [!Warning]
 > Please respect copyright, I created this software without any cost or support. ***DO NOT STEAL THE CODE AND MAKE IT YOURS, WHILE EVERYTHING IS BUILT BY ME***. For example: edit ***Author & Developed by: Vu Quang Dai*** to your name, I know open source you can edit everything, but I want respect for the effort I put in.
->
-> **CAN BE ADDED**
-> * "Building upon existing code": Building upon existing source code.
-> * "Modifying" or "customizing": Changing or customizing the source code.
-> * "Repurposing": Reusing the source code for another purpose.
 
-Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure. I learned how to repair corrupted images in more depth, I learned from the sources: [JpegRepair](https://github.com/dmahurin/jpegrepair), [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp), [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)
+*Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure. I learned how to repair corrupted images in more depth, I learned from the sources: [JpegRepair](https://github.com/dmahurin/jpegrepair), [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp), [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)*
 
 ```You can contact me via gmail (email) to save the files you need. This will cost you a fee, thank you. If you have any problems or questions here => https://github.com/VQD-BSV/RecoveryJpeg/issues, I will reply as soon as possible.```
 
