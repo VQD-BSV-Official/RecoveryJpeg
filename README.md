@@ -1,4 +1,4 @@
-## ***Developed by Vũ Quang Đại / <BSVRecovery.vn@gmail.com>***
+## ***Developed by Vũ Quang Đại / <QuangDaiVQD@gmail.com>***
 > [!Warning]
 > Please respect copyright, I created this software without any cost or support. ***DO NOT STEAL THE CODE AND MAKE IT YOURS, WHILE EVERYTHING IS BUILT BY ME***. For example: edit ***Author & Developed by: Vu Quang Dai*** to your name, I know open source you can edit everything, but I want respect for the effort I put in.
 
