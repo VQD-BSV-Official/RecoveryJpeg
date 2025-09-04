@@ -55,8 +55,12 @@ class MainWindow:
     def main(self):
         if self.image != "": # Đọc file và thêm vào list
             list_offset = read_data(self.image)
-            for offset in list_offset:
-                self.uic.listWidget.addItem(offset)
+
+            if list_offset != []:
+                for offset in list_offset:
+                    self.uic.listWidget.addItem(offset)
+
+            else: self.uic.textEdit.append("Nothing..................")
 
 
 # ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -64,28 +68,20 @@ class MainWindow:
     def status(self, mes):
         self.uic.statusBar.showMessage(mes)
 
-    # Delete file - N6T10_2024
+    # Delete file - N3T9_25
     def delete(self):
-        if os.path.exists("BSVRecovery.vn"):
-            os.remove("BSVRecovery.vn")
-
-        elif os.path.exists("BSVRecovery.vn.raw"):
-            os.remove("BSVRecovery.vn.raw")
+        for file in ["BSVRecovery.vn", "BSVRecovery.vn.raw"]:
+            if os.path.exists(file): os.remove(file)
 
 
-    # View image (label) - N12T1_25
+    # View image (label) - N3T9_25
     def view_label(self, label_width, label_height, pixmap):
         # Tạo QImage với kích thước của QLabel
         image = QImage(label_width, label_height, QImage.Format.Format_ARGB32)
         image.fill(Qt.GlobalColor.transparent)  # Nền trong suốt
 
         # Tính toán kích thước ảnh giữ tỷ lệ
-        scaled_pixmap = pixmap.scaled(
-            label_width,
-            label_height,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
-        )
+        scaled_pixmap = pixmap.scaled(label_width, label_height, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
 
         # Dùng QPainter để căn giữa ảnh trên QLabel
         painter = QPainter(image)
@@ -104,7 +100,7 @@ class MainWindow:
         with open(self.image, "rb") as file:
             file.seek(self.start) # Thay vì đọc cả file di chỏ đến offset
             data = file.read(self.end - self.start)
-            h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A00000000000000526570616972656420627920425356205265636F76657279200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+            h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
             
             pixmap = QPixmap() # Load byte (image)
             if pixmap.loadFromData(h34d3r + data):
@@ -113,39 +109,38 @@ class MainWindow:
                 self.uic.label.setPixmap(QPixmap.fromImage(image))
 
             else:
-                print("Không thể tải dữ liệu hình ảnh!")
+                pass
+                # print("Không thể tải dữ liệu hình ảnh!")
 
 
-    # Save File - N24T1_25
+# ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    # Save File - N3T9_25
     def save_file(self):
         self.save_image = QFileDialog.getSaveFileName(None, "Save File", None ,filter='JPEG files (*.JPG);; All files (*)')[0]
         
         if self.save_image and self.image != '' and self.start != 0:
             with open(self.image, "rb") as file:
                 file.seek(self.start) # Thay vì đọc cả file di chỏ đến offset
-                data = file.read(self.end - self.start)
-                cropped_data = data
+                cropped_data = file.read(self.end - self.start)
 
-            if b"\xFF\xDB\x00\x84" in cropped_data:
-                fr0mh3x = 'FFDB0084'
+            if b"\xFF\xDB\x00\x84" in cropped_data: fr0mh3x = 'FFDB0084'
+            elif b"\xFF\xDB\x00\x43" in cropped_data: fr0mh3x = 'FFDB0043'
 
-            elif b"\xFF\xDB\x00\x43" in cropped_data:
-                fr0mh3x = 'FFDB0043'
-
-            h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A00000000000000526570616972656420627920425356205265636F76657279200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+            header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
             with open(self.save_image, 'wb') as f:
-                f.write(h34d3r + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
+                f.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
             self.uic.textEdit.append(f'''💾 Save File: {self.start:X}x{self.end:X} --> {self.save_image}''')
-        else:
-            self.uic.textEdit.append(f'''⚠️ Can't save''')
+
+        else: self.uic.textEdit.append(f'''⚠️ Can't save''')
             
         # self.delete()
 
-    # Export Folder - N24T1_25
+    # Export Folder - N3T9_25
     def export_folder(self):
         self.export_folder = QFileDialog.getExistingDirectory(None, "Select Folder")
-
 
         if self.uic.listWidget.count() != 0 and self.export_folder != '':
             self.export_count = 0
@@ -157,24 +152,22 @@ class MainWindow:
 
                 with open(self.image, "rb") as file:
                     file.seek(self.start) # Thay vì đọc cả file di chỏ đến offset
-                    data = file.read(self.end - self.start)
-                    cropped_data = data
+                    cropped_data = file.read(self.end - self.start)
 
-                if b"\xFF\xDB\x00\x84" in cropped_data:
-                    fr0mh3x = 'FFDB0084'
+                if b"\xFF\xDB\x00\x84" in cropped_data: fr0mh3x = 'FFDB0084'
+                elif b"\xFF\xDB\x00\x43" in cropped_data: fr0mh3x = 'FFDB0043'
 
-                elif b"\xFF\xDB\x00\x43" in cropped_data:
-                    fr0mh3x = 'FFDB0043'
-
-                h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A00000000000000526570616972656420627920425356205265636F76657279200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+                header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
                 self.export_count += 1
                 with open(f"{self.export_folder}/IMG_{self.export_count}.JPG", 'wb') as f:
-                    f.write(h34d3r + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
+                    f.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
             self.uic.textEdit.append(f'💾 Export Folder: {self.export_folder}')
-        else:
-            self.uic.textEdit.append(f'''⚠️ Can't export folder''')
 
+        else: self.uic.textEdit.append(f'''⚠️ Can't export folder''')
+
+# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     # Open Folder - N13T10_2024
     def open_folder(self):
@@ -218,11 +211,11 @@ class MainWindow:
         self.main()
         
 # ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # Replace x25805 (ransomwawre) - N16T10_2024
+    # Replace x25805 (ransomwawre) - N3T9_25
     def hex_x25805(self):
         self.image_hex = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
 
-        if self.image_hex != "":
+        if self.image_hex != "" and self.image != "":
             self.delete()
             # Open file ref
             with open(self.image_hex, 'rb') as f:
@@ -232,7 +225,7 @@ class MainWindow:
 
             # Save header
             with open('BSVRecovery.vn', 'wb') as f:
-                f.write(d4t4_r3f[st4rt_ind3x:end_ind3x+12])
+                f.write(d4t4_r3f[st4rt_ind3x:end_ind3x + 12])
 
             # Add from byte 153605 -> and
             with open(self.image, 'rb') as f1, open('BSVRecovery.vn', 'ab') as f2:
