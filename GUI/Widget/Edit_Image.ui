@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>949</width>
+    <width>984</width>
     <height>456</height>
    </rect>
   </property>
@@ -44,7 +44,7 @@
     <rect>
      <x>720</x>
      <y>7</y>
-     <width>221</width>
+     <width>251</width>
      <height>434</height>
     </rect>
    </property>
@@ -78,7 +78,7 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>110</x>
       <y>20</y>
       <width>21</width>
       <height>16</height>
@@ -89,15 +89,15 @@
       <pointsize>10</pointsize>
      </font>
     </property>
-    <property name="text">
-     <string>Cr</string>
+    <property name="pixmap">
+     <pixmap>C:/Users/bevis/Desktop/green.jpg</pixmap>
     </property>
    </widget>
    <widget class="QSlider" name="slider_cb">
     <property name="geometry">
      <rect>
-      <x>100</x>
-      <y>43</y>
+      <x>110</x>
+      <y>40</y>
       <width>22</width>
       <height>241</height>
      </rect>
@@ -115,8 +115,8 @@
    <widget class="QSlider" name="slider_cr">
     <property name="geometry">
      <rect>
-      <x>170</x>
-      <y>43</y>
+      <x>200</x>
+      <y>40</y>
       <width>22</width>
       <height>241</height>
      </rect>
@@ -134,8 +134,8 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>45</x>
-      <y>20</y>
+      <x>200</x>
+      <y>17</y>
       <width>21</width>
       <height>16</height>
      </rect>
@@ -146,13 +146,16 @@
      </font>
     </property>
     <property name="text">
-     <string>Y</string>
+     <string/>
+    </property>
+    <property name="pixmap">
+     <pixmap>C:/Users/bevis/Desktop/red.jpg</pixmap>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>30</x>
       <y>20</y>
       <width>21</width>
       <height>16</height>
@@ -163,8 +166,11 @@
       <pointsize>10</pointsize>
      </font>
     </property>
-    <property name="text">
-     <string>Cb</string>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="pixmap">
+     <pixmap>C:/Users/bevis/Desktop/white.jpg</pixmap>
     </property>
    </widget>
    <widget class="QCheckBox" name="b0x_d3l3t3">
@@ -208,48 +214,48 @@
    <widget class="QLabel" name="l_y">
     <property name="geometry">
      <rect>
-      <x>40</x>
+      <x>20</x>
       <y>288</y>
-      <width>41</width>
-      <height>16</height>
+      <width>71</width>
+      <height>20</height>
      </rect>
     </property>
     <property name="text">
-     <string>0</string>
+     <string>Y = 0</string>
     </property>
    </widget>
    <widget class="QLabel" name="l_cr">
     <property name="geometry">
      <rect>
-      <x>160</x>
-      <y>288</y>
-      <width>41</width>
+      <x>180</x>
+      <y>290</y>
+      <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>0</string>
+     <string>Cr = 0</string>
     </property>
    </widget>
    <widget class="QLabel" name="l_cb">
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>288</y>
-      <width>49</width>
+      <y>290</y>
+      <width>71</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>0</string>
+     <string>Cb = 0</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_8">
     <property name="geometry">
      <rect>
-      <x>30</x>
+      <x>20</x>
       <y>330</y>
-      <width>51</width>
+      <width>61</width>
       <height>20</height>
      </rect>
     </property>
@@ -300,7 +306,7 @@
      <rect>
       <x>90</x>
       <y>330</y>
-      <width>101</width>
+      <width>131</width>
       <height>22</height>
      </rect>
     </property>
@@ -311,9 +317,9 @@
    <widget class="QPushButton" name="b_Save">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>180</x>
       <y>400</y>
-      <width>42</width>
+      <width>61</width>
       <height>25</height>
      </rect>
     </property>

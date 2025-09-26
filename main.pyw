@@ -3,7 +3,7 @@ import sys, os, subprocess, binascii
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QSizePolicy
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
 
 from Lab.Read_Data import read_data
 
@@ -51,9 +51,31 @@ class MainWindow:
 
 
 # ////////////////////////////////////////main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    def find_pattern(self, pattern=b"\xFF\xDA\x00"):
+        with open(self.image, "rb") as f:
+            data = f.read()
+
+        offsets = []
+        start = 0
+        while True:
+            idx = data.find(pattern, start)
+            if idx == -1:
+                break
+            offsets.append(idx)
+            start = idx + 1  # tiếp tục tìm sau vị trí vừa tìm thấy
+
+        return offsets
+
+
+
+
     # Find marker - N24T1_2025
     def main(self):
         if self.image != "": # Đọc file và thêm vào list
+            offsets_ffda00 = self.find_pattern()
+            self.uic.textEdit.append(f"Find byte: FF DA 00 - Count {len(offsets_ffda00)}")
+
+
             list_offset = read_data(self.image)
 
             if list_offset != []:
@@ -70,7 +92,7 @@ class MainWindow:
 
     # Delete file - N3T9_25
     def delete(self):
-        for file in ["BSVRecovery.vn", "BSVRecovery.vn.raw"]:
+        for file in ["temp_rp", "temp_rp.raw"]:
             if os.path.exists(file): os.remove(file)
 
 
@@ -90,27 +112,52 @@ class MainWindow:
         painter.drawPixmap(x_offset, y_offset, scaled_pixmap)
         painter.end()
 
-        return image        
+        return image  
+
+
+    # def view_label(self, label_width, label_height, pixmap):
+    #     return pixmap.scaled(
+    #         label_width, label_height,
+    #         Qt.AspectRatioMode.KeepAspectRatio,
+    #         Qt.TransformationMode.SmoothTransformation
+    #     )
+
+
 
     # Click Item & View - N24T1_25
     def item_clicked(self, item):
-        ioffset = item.text() # Chuyển đổi hex -> offset
+        ioffset = item.text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
         self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
 
+
+        # Nếu giống với lần trước thì bỏ qua
+        if hasattr(self, "last_range") and self.last_range == (self.start, self.end):
+            return
+        self.last_range = (self.start, self.end)
+
+
         with open(self.image, "rb") as file:
-            file.seek(self.start) # Thay vì đọc cả file di chỏ đến offset
+            file.seek(self.start) # Di chỏ đến offset
             data = file.read(self.end - self.start)
             h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
             
             pixmap = QPixmap() # Load byte (image)
             if pixmap.loadFromData(h34d3r + data):
                 # View image
-                image = self.view_label(self.uic.label.width(), self.uic.label.height(), pixmap)
-                self.uic.label.setPixmap(QPixmap.fromImage(image))
+                # image = self.view_label(self.uic.label.width(), self.uic.label.height(), pixmap)
+                # self.uic.label.setPixmap(QPixmap.fromImage(image))
+
+                # self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
+                self.uic.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic.label.width(), self.uic.label.height(), pixmap)))
+
+                self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
+                self.uic.label.setScaledContents(False)
+
 
             else:
                 pass
                 # print("Không thể tải dữ liệu hình ảnh!")
+
 
 
 # ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -184,12 +231,13 @@ class MainWindow:
             for i in os.listdir(self.image):
                 if os.path.isfile(os.path.join(self.image, i)): # Check if it's a file (not a folder)
                     with open(f"{self.image}/{i}", "rb") as r:
-                        with open("BSVRecovery.vn", "ab") as w:
+                        with open("temp_rp", "ab") as w:
                             w.write(r.read())
 
             # View & log
             self.uic.textEdit.append(f'📂 Open Folder: {self.image}')
-            self.image = "BSVRecovery.vn"
+            self.image = "temp_rp"
+
         self.main()
 
     # Open File - N10T10_2024
@@ -224,16 +272,16 @@ class MainWindow:
             end_ind3x = d4t4_r3f.rfind(b'\xFF\xDA')
 
             # Save header
-            with open('BSVRecovery.vn', 'wb') as f:
+            with open('temp_rp', 'wb') as f:
                 f.write(d4t4_r3f[st4rt_ind3x:end_ind3x + 12])
 
             # Add from byte 153605 -> and
-            with open(self.image, 'rb') as f1, open('BSVRecovery.vn', 'ab') as f2:
+            with open(self.image, 'rb') as f1, open('temp_rp', 'ab') as f2:
                 f2.write(f1.read()[153605:None])
 
             # View & add text
             self.uic.textEdit.append(f'✂ Replace x25805 of file {os.path.basename(self.image)} with "SOS marker" of file {os.path.basename(self.image_hex)}')
-            self.image = 'BSVRecovery.vn'
+            self.image = 'temp_rp'
             self.main()
 
     # File RAW
@@ -257,13 +305,13 @@ class MainWindow:
                     d4t4_r3f = f.read()
                 end_ind3x = d4t4_r3f.find(binascii.unhexlify('FFD8FFC400'))
                 if end_ind3x != -1:
-                    with open("BSVRecovery.vn.raw", 'wb') as f:
+                    with open("temp_rp.raw", 'wb') as f:
                         f.write(d4t4_r3f[:end_ind3x])
 
                 #Add byte FFD8FFC4 -> cuối file
                 with open(self.image, 'rb') as f:
                     d4t4_cr2 = f.read()
-                    with open("BSVRecovery.vn.raw", 'ab') as d4t4_cr2_2:
+                    with open("temp_rp.raw", 'ab') as d4t4_cr2_2:
                         d4t4_cr2_2.write(d4t4_cr2[d4t4_cr2.index(bytes.fromhex('FFD8FFC400')):None])
 
 
@@ -274,7 +322,7 @@ class MainWindow:
                     data = f.read()
                     d4t4_4rw, index = self.RAW_NEF_ARW(data)
 
-                with open("BSVRecovery.vn.raw", 'wb') as f:
+                with open("temp_rp.raw", 'wb') as f:
                     f.write(d4t4_4rw[:index])
                 #-------------------------------------------------
                 # Add byte 00000 -> cuối tệp
@@ -282,15 +330,15 @@ class MainWindow:
                     data = f.read()
                     d4t4_4rw, index = self.RAW_NEF_ARW(data)
 
-                with open("BSVRecovery.vn.raw", 'ab') as f:
+                with open("temp_rp.raw", 'ab') as f:
                     f.write(d4t4_4rw[index:])
                 #-------------------------------------------------
 
             # Conver JPG
-            command = [f"{os.getcwd()}/Irfan/i_view64.exe", "BSVRecovery.vn.raw", "/convert=" + f"IMG_.JPG"]
+            command = [f"{os.getcwd()}/Irfan/i_view64.exe", "temp_rp.raw", "/convert=" + f"IMG_.JPG"]
             subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            os.replace("BSVRecovery.vn.raw", file0)
+            os.replace("temp_rp.raw", file0)
 
             self.image = 'IMG_.JPG'
             self.main()
@@ -315,10 +363,10 @@ class MainWindow:
             st4rt_ind3x = d4t4_r3f.index(b'\xFF\xD8')
             end_ind3x = d4t4_r3f.rfind(b'\xFF\xDA')
 
-            with open(self.image, 'rb') as r, open('BSVRecovery.vn', 'wb') as w:
+            with open(self.image, 'rb') as r, open('temp_rp', 'wb') as w:
                 w.write(d4t4_r3f[st4rt_ind3x:end_ind3x + 12] + r.read()[end_ind3x + 12:])
 
-            self.image = 'BSVRecovery.vn'
+            self.image = 'temp_rp'
             self.main()
 
 # ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -352,7 +400,7 @@ class MainWindow:
         # Using JpegRecovery
         if self.uic_Create_New.checkBox.isChecked() == True:
             # Read file & Write from x25805
-            with open(self.image, 'rb') as f1, open('BSVRecovery.vn', 'wb') as f2:
+            with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
                 f2.write(f1.read()[153605:None])
 
             self.uic.textEdit.append(f'🔍 Please wait for image processing')
@@ -360,18 +408,18 @@ class MainWindow:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             # RUN
-            pr0c = subprocess.Popen(["./Tool/JpegRecovery.exe","BSVRecovery.vn"], startupinfo=startupinfo)
+            pr0c = subprocess.Popen(["./Tool/JpegRecovery.exe","temp_rp"], startupinfo=startupinfo)
             while pr0c.poll() is None:
                 QtWidgets.QApplication.processEvents()
             pr0c.wait()
 
-            if os.path.exists("BSVRecovery.vn.jpg"):
+            if os.path.exists("temp_rp.jpg"):
                 # Rename & delete
                 self.delete()
-                os.rename("BSVRecovery.vn.jpg", "BSVRecovery.vn")
+                os.rename("temp_rp.jpg", "temp_rp")
 
                 self.uic.textEdit.append(f'👉 Processed')
-                self.image = "BSVRecovery.vn"
+                self.image = "temp_rp"
                 self.main()
             else:
                 self.uic.textEdit.append(f'👉 Processed Fail')
@@ -398,9 +446,9 @@ class MainWindow:
         self.uic_3dit_Im4g3.b0x_ins3rt.clicked.connect(self.checkbox)
 
         # Change num in slider
-        self.uic_3dit_Im4g3.slider_cr.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_cr.setText(str(self.uic_3dit_Im4g3.slider_cr.value())))
-        self.uic_3dit_Im4g3.slider_cb.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_cb.setText(str(self.uic_3dit_Im4g3.slider_cb.value())))
-        self.uic_3dit_Im4g3.slider_y.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_y.setText(str(self.uic_3dit_Im4g3.slider_y.value())))
+        self.uic_3dit_Im4g3.slider_cr.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_cr.setText(f"Cr = {self.uic_3dit_Im4g3.slider_cr.value()}"))
+        self.uic_3dit_Im4g3.slider_cb.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_cb.setText(f"Cb = {self.uic_3dit_Im4g3.slider_cb.value()}"))
+        self.uic_3dit_Im4g3.slider_y.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_y.setText(f"Y = {self.uic_3dit_Im4g3.slider_y.value()}"))
 
     # Save - N17T10_2024
     def Edit_Image_Save(self):

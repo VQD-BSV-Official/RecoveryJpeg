@@ -6,16 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1167</width>
-    <height>744</height>
+    <width>1017</width>
+    <height>664</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>BSV Recovery - RecoveryJpeg v1.4.0</string>
+   <string>RecoveryJpeg v1.5.0</string>
   </property>
   <property name="windowIcon">
    <iconset>
     <normaloff>Logo/logo.ico</normaloff>Logo/logo.ico</iconset>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
   </property>
   <property name="animated">
    <bool>false</bool>
@@ -39,6 +42,12 @@
         </property>
        </widget>
        <widget class="QLabel" name="label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="cursor">
          <cursorShape>CrossCursor</cursorShape>
         </property>
@@ -92,7 +101,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1167</width>
+     <width>1017</width>
      <height>22</height>
     </rect>
    </property>

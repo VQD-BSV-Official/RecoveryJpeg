@@ -12,10 +12,11 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1167, 744)
+        MainWindow.resize(1017, 664)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("Logo/logo.ico"), QtGui.QIcon.Mode.Normal, QtGui.QIcon.State.Off)
         MainWindow.setWindowIcon(icon)
+        MainWindow.setStyleSheet("")
         MainWindow.setAnimated(False)
         self.centralwidget = QtWidgets.QWidget(parent=MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -33,6 +34,11 @@ class Ui_MainWindow(object):
         self.listWidget.setFont(font)
         self.listWidget.setObjectName("listWidget")
         self.label = QtWidgets.QLabel(parent=self.splitter)
+        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
+        self.label.setSizePolicy(sizePolicy)
         self.label.setCursor(QtGui.QCursor(QtCore.Qt.CursorShape.CrossCursor))
         self.label.setAutoFillBackground(False)
         self.label.setStyleSheet("")
@@ -57,7 +63,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.label_Copyright, 1, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(parent=MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1167, 22))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1017, 22))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(parent=self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -145,7 +151,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "BSV Recovery - RecoveryJpeg v1.4.0"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "RecoveryJpeg v1.5.0"))
         self.label_Copyright.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:700;\">Author &amp; Developed by: </span><a href=\"https://www.facebook.com/QuangDaiVQD\"><span style=\" font-weight:700; text-decoration: underline; color:#0000ff;\">Vũ Quang Đại</span></a><br/></p></body></html>"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuOpen.setTitle(_translate("MainWindow", "Open"))

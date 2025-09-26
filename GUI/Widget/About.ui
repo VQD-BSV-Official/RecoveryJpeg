@@ -52,7 +52,7 @@
     </font>
    </property>
    <property name="text">
-    <string>RecoveryJpeg v1.4.0</string>
+    <string>RecoveryJpeg v1.5.0</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
