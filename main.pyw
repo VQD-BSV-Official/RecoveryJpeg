@@ -1,11 +1,11 @@
-import sys, os, subprocess, binascii
+import sys, os, subprocess, binascii, shutil
 
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QListView
 
-from Lab.Read_Data import read_data
+from Run.read_data import read_data
 
 from GUI.Sreen.GUI import Ui_MainWindow
 from GUI.Widget.About import Ui_About
@@ -135,7 +135,7 @@ class MainWindow:
 
             self.uic.listWidget.addItem(item)
 
-    # Find marker - N24T1_2025
+    # Find marker - N24T1_25
     def main(self):
         if self.image: # Đọc file và thêm vào list
             list_offset = read_data(self.image)
@@ -491,7 +491,7 @@ class MainWindow:
         save_file = QFileDialog.getSaveFileName(None, "Save File", "" ,filter='JPEG files (*.JPG);; All files (*)')[0]
         # Replace
         if save_file and os.path.exists("temp_img.JPG"):
-            os.replace("temp_img.JPG", save_file)
+            shutil.copy("temp_img.JPG", save_file)
 
     # Check box - N26T9_25
     def checkbox(self):
@@ -511,9 +511,13 @@ class MainWindow:
             os.remove("temp_img.JPG")
         self.uic_3dit_Im4g3.label.clear()
 
+        
         # View
         if self.im4g3:
-            self.uic_3dit_Im4g3.label.setPixmap(QPixmap(self.im4g3))
+            pix = QPixmap(self.im4g3)
+            self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
+
+            # self.uic_3dit_Im4g3.label.setPixmap(QPixmap(self.im4g3))
 
     # main - N17T10_2024
     def Edit_Image_View(self):
@@ -537,7 +541,8 @@ class MainWindow:
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             subprocess.Popen(pr0c, startupinfo=startupinfo)   
             # RUN & View
-            self.uic_3dit_Im4g3.label.setPixmap(QPixmap(fil30))
+            pix = QPixmap(fil30)
+            self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
 
     def show(self):
         self.main_win.show()
