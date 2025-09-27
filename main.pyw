@@ -1,9 +1,9 @@
 import sys, os, subprocess, binascii
 
 from PyQt6 import QtWidgets
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QListView
 
 from Lab.Read_Data import read_data
 
@@ -19,8 +19,39 @@ class MainWindow:
         self.uic.setupUi(self.main_win)
 
 
-        self.uic.splitter.setStretchFactor(1, 3) 
-        self.uic.splitter_2.setStretchFactor(0, 1) 
+        # //////////////////////////////////////////
+        # //////////////////////////////////////////
+        self.uic.listWidget.setViewMode(QListView.ViewMode.IconMode)
+        self.uic.listWidget.setFlow(QListView.Flow.LeftToRight)
+        self.uic.listWidget.setWrapping(True)
+        self.uic.listWidget.setResizeMode(QListWidget.ResizeMode.Adjust)
+        self.uic.listWidget.setMovement(QListView.Movement.Static)
+        self.uic.listWidget.setSpacing(12)
+
+        # THAM SỐ: thay đổi nếu muốn thumbnail khác
+        self.thumb_w = 89
+        self.thumb_h = 89
+        self.thumb_size = QSize(self.thumb_w, self.thumb_h)
+        self.uic.listWidget.setIconSize(self.thumb_size)
+
+        # Tính chiều cao cho text (dựa vào font hiện tại)
+        fm = QFontMetrics(self.uic.listWidget.font())
+        text_h = fm.height() + 4  # +padding nhỏ
+
+        # Grid size = thumbnail + khoảng cho text + padding
+        grid_w = self.thumb_w + 20
+        grid_h = self.thumb_h + text_h + 18
+        self.grid_size = QSize(grid_w, grid_h)
+        self.uic.listWidget.setGridSize(self.grid_size)
+
+        # //////////////////////////////////////////
+        # //////////////////////////////////////////
+
+        # self.uic.splitter.setStretchFactor(0 , 1) 
+        self.uic.splitter.setSizes([400, 100])
+        self.uic.splitter_2.setSizes([220, 100])
+
+        # self.uic.splitter_2.setStretchFactor(0, 1) 
 
         # Open File, Folder - N10T10_2024
         self.uic.Open_File.triggered.connect(self.open_file)
@@ -41,7 +72,6 @@ class MainWindow:
 
         self.uic.listWidget.itemClicked.connect(self.item_clicked)
 
-        self.status("Ready")
         # self.uic.Open_File.setStatusTip("Open a file from your computer")
 
         # Value - N13T10_2024
@@ -49,47 +79,75 @@ class MainWindow:
         self.start = self.end = 0
 
 
+    def make_square_thumbnail(self, pixmap: QPixmap) -> QPixmap:
+        """
+        Vẽ pixmap đã scaled vào 1 QPixmap kích thước cố định (self.thumb_size),
+        canh giữa, background trắng (hoặc trong suốt nếu bạn muốn).
+        """
+        # Scale giữ tỉ lệ
+        scaled = pixmap.scaled(
+            self.thumb_w, self.thumb_h,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+
+        base = QPixmap(self.thumb_w, self.thumb_h)
+        base.fill(Qt.GlobalColor.white)  # đổi sang transparent nếu muốn
+
+        painter = QPainter(base)
+        x = (self.thumb_w - scaled.width()) // 2
+        y = (self.thumb_h - scaled.height()) // 2
+        painter.drawPixmap(x, y, scaled)
+        painter.end()
+        
+        return base
 
 # ////////////////////////////////////////main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    def find_pattern(self, pattern=b"\xFF\xDA\x00"):
-        with open(self.image, "rb") as f:
-            data = f.read()
-
-        offsets = []
-        start = 0
-        while True:
-            idx = data.find(pattern, start)
-            if idx == -1:
-                break
-            offsets.append(idx)
-            start = idx + 1  # tiếp tục tìm sau vị trí vừa tìm thấy
-
-        return offsets
+    def add_image(self, item_off):
+        ioffset = item_off # .text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
+        self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
 
 
+        # Nếu giống với lần trước thì bỏ qua
+        if hasattr(self, "last_range") and self.last_range == (self.start, self.end):
+            return
+        self.last_range = (self.start, self.end)
 
+
+        with open(self.image, "rb") as file:
+            file.seek(self.start) # Di chỏ đến offset
+            data = file.read(self.end - self.start)
+            h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+            
+            pixmap = QPixmap() # Load byte (image)
+            pixmap.loadFromData(h34d3r + data)
+
+            w = pixmap.width(); h = pixmap.height()
+
+            thumb = self.make_square_thumbnail(pixmap)
+            item = QListWidgetItem(QIcon(thumb), f"{w}x{h}") # item_off)
+
+            # Ép size ô bằng grid_size để đồng nhất & căn chữ giữa
+            item.setSizeHint(self.grid_size)
+            item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+            item.setToolTip(f"{item_off}")
+
+            self.uic.listWidget.addItem(item)
 
     # Find marker - N24T1_2025
     def main(self):
-        if self.image != "": # Đọc file và thêm vào list
-            offsets_ffda00 = self.find_pattern()
-            self.uic.textEdit.append(f"Find byte: FF DA 00 - Count {len(offsets_ffda00)}")
-
-
+        if self.image: # Đọc file và thêm vào list
             list_offset = read_data(self.image)
 
             if list_offset != []:
                 for offset in list_offset:
-                    self.uic.listWidget.addItem(offset)
+                    self.add_image(offset)
+                    # self.uic.listWidget.addItem(offset)
 
             else: self.uic.textEdit.append("Nothing..................")
 
-
 # ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # Status - N12T1_25
-    def status(self, mes):
-        self.uic.statusBar.showMessage(mes)
-
     # Delete file - N3T9_25
     def delete(self):
         for file in ["temp_rp", "temp_rp.raw"]:
@@ -115,25 +173,11 @@ class MainWindow:
         return image  
 
 
-    # def view_label(self, label_width, label_height, pixmap):
-    #     return pixmap.scaled(
-    #         label_width, label_height,
-    #         Qt.AspectRatioMode.KeepAspectRatio,
-    #         Qt.TransformationMode.SmoothTransformation
-    #     )
-
-
 
     # Click Item & View - N24T1_25
     def item_clicked(self, item):
-        ioffset = item.text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
+        ioffset = item.toolTip() # item.text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
         self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
-
-
-        # Nếu giống với lần trước thì bỏ qua
-        if hasattr(self, "last_range") and self.last_range == (self.start, self.end):
-            return
-        self.last_range = (self.start, self.end)
 
 
         with open(self.image, "rb") as file:
@@ -144,10 +188,6 @@ class MainWindow:
             pixmap = QPixmap() # Load byte (image)
             if pixmap.loadFromData(h34d3r + data):
                 # View image
-                # image = self.view_label(self.uic.label.width(), self.uic.label.height(), pixmap)
-                # self.uic.label.setPixmap(QPixmap.fromImage(image))
-
-                # self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
                 self.uic.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic.label.width(), self.uic.label.height(), pixmap)))
 
                 self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
@@ -159,64 +199,61 @@ class MainWindow:
                 # print("Không thể tải dữ liệu hình ảnh!")
 
 
-
 # ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 # ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # Save File - N3T9_25
+    # Save File - N26T9_25
     def save_file(self):
         self.save_image = QFileDialog.getSaveFileName(None, "Save File", None ,filter='JPEG files (*.JPG);; All files (*)')[0]
+        if not (self.save_image and self.image and self.start):
+            self.uic.textEdit.append("⚠️ Can't save")
+            return
         
-        if self.save_image and self.image != '' and self.start != 0:
-            with open(self.image, "rb") as file:
-                file.seek(self.start) # Thay vì đọc cả file di chỏ đến offset
-                cropped_data = file.read(self.end - self.start)
+        header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043"}
 
-            if b"\xFF\xDB\x00\x84" in cropped_data: fr0mh3x = 'FFDB0084'
-            elif b"\xFF\xDB\x00\x43" in cropped_data: fr0mh3x = 'FFDB0043'
+        with open(self.image, "rb") as file:
+            file.seek(self.start) # Di chỏ đến offset
+            cropped_data = file.read(self.end - self.start)
 
-            header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+        fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
+
+        if fr0mh3x:
             with open(self.save_image, 'wb') as f:
                 f.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
             self.uic.textEdit.append(f'''💾 Save File: {self.start:X}x{self.end:X} --> {self.save_image}''')
+        else:
+            self.uic.textEdit.append("⚠️ Can't save (marker not found)")
 
-        else: self.uic.textEdit.append(f'''⚠️ Can't save''')
-            
-        # self.delete()
 
-    # Export Folder - N3T9_25
+    # Export Folder - N26T9_25
     def export_folder(self):
         self.export_folder = QFileDialog.getExistingDirectory(None, "Select Folder")
+        if not (self.export_folder and self.uic.listWidget.count()):
+            self.uic.textEdit.append("⚠️ Can't export folder")
+            return
 
-        if self.uic.listWidget.count() != 0 and self.export_folder != '':
-            self.export_count = 0
-            for index in range(self.uic.listWidget.count()):
-                item = self.uic.listWidget.item(index)
+        header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043"}
 
-                ioffset = item.text()
-                self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
+        with open(self.image, "rb") as f:
+            for idx in range(self.uic.listWidget.count()):
+                start, end = map(lambda x: int(x, 16), self.uic.listWidget.item(idx).text().split("x"))
+                f.seek(start)
+                cropped_data = f.read(end - start)
 
-                with open(self.image, "rb") as file:
-                    file.seek(self.start) # Thay vì đọc cả file di chỏ đến offset
-                    cropped_data = file.read(self.end - self.start)
+                fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
+                if not fr0mh3x:
+                    continue  # bỏ qua nếu không tìm thấy marker
 
-                if b"\xFF\xDB\x00\x84" in cropped_data: fr0mh3x = 'FFDB0084'
-                elif b"\xFF\xDB\x00\x43" in cropped_data: fr0mh3x = 'FFDB0043'
+                out_path = f"{self.export_folder}/OIMG_{idx+1}.JPG"
+                with open(out_path, "wb") as out:
+                    out.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
-                header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-                self.export_count += 1
-                with open(f"{self.export_folder}/IMG_{self.export_count}.JPG", 'wb') as f:
-                    f.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
+        self.uic.textEdit.append(f"💾 Export Folder: {self.export_folder}")
 
-            self.uic.textEdit.append(f'💾 Export Folder: {self.export_folder}')
 
-        else: self.uic.textEdit.append(f'''⚠️ Can't export folder''')
-
-# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-    # Open Folder - N13T10_2024
+    # Open Folder - N26T9_25
     def open_folder(self):
         self.image = QFileDialog.getExistingDirectory(None, "Select Folder")
         # Reset list & label
@@ -224,8 +261,6 @@ class MainWindow:
         self.uic.label.clear()
 
         if self.image != "":
-            self.status("Read Folder")
-
             self.delete()
             # Read folder
             for i in os.listdir(self.image):
@@ -240,7 +275,7 @@ class MainWindow:
 
         self.main()
 
-    # Open File - N10T10_2024
+    # Open File - N26T9_25
     def open_file(self):
         self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;JPEG files (*.JPEG *.JPG);;All files (*)')[0]
         # Reset list & label
@@ -248,9 +283,6 @@ class MainWindow:
         self.uic.label.clear()
 
         if self.image != "":
-            self.status("Read File")
-            # Set name file & log
-            self.status(os.path.basename(self.image))
             self.uic.textEdit.append(f'📂 Open File: {self.image}')
         else:
             self.uic.textEdit.append(f'''⚠️ Can't open file''')
@@ -335,12 +367,12 @@ class MainWindow:
                 #-------------------------------------------------
 
             # Conver JPG
-            command = [f"{os.getcwd()}/Irfan/i_view64.exe", "temp_rp.raw", "/convert=" + f"IMG_.JPG"]
+            command = [f"{os.getcwd()}/Irfan/i_view64.exe", "temp_rp.raw", "/convert=" + f"temp_img.JPG"]
             subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
             os.replace("temp_rp.raw", file0)
 
-            self.image = 'IMG_.JPG'
+            self.image = 'temp_img.JPG'
             self.main()
 
     # Get data
@@ -370,7 +402,7 @@ class MainWindow:
             self.main()
 
 # ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # About - N16T10_2024
+    # About - N16T10_24
     def show_About(self):
         self.about = QMainWindow()
         self.uic_about = Ui_About()
@@ -380,7 +412,8 @@ class MainWindow:
         # Exit
         self.uic_about.b_OK.clicked.connect(lambda: self.about.close())
 
-    # Create New - N16T10_2024
+
+    # Create New - N16T10_24
     def show_Create_New(self):
         self.Create_New = QMainWindow()
         self.uic_Create_New = Ui_Create_New()
@@ -424,7 +457,10 @@ class MainWindow:
             else:
                 self.uic.textEdit.append(f'👉 Processed Fail')
 
-    # Edit Image - N17T10_2024
+# ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+    # Edit Image - N17T10_24
     def show_Edit_Image(self):
         self.Sr33n_3dit_Im4g3 = QMainWindow()
         self.uic_3dit_Im4g3 = Ui_Edit_Image()
@@ -450,33 +486,33 @@ class MainWindow:
         self.uic_3dit_Im4g3.slider_cb.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_cb.setText(f"Cb = {self.uic_3dit_Im4g3.slider_cb.value()}"))
         self.uic_3dit_Im4g3.slider_y.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_y.setText(f"Y = {self.uic_3dit_Im4g3.slider_y.value()}"))
 
-    # Save - N17T10_2024
+    # Save - N26T9_25
     def Edit_Image_Save(self):
-        save_file = QFileDialog.getSaveFileName(None, "Save File", None ,filter='JPEG files (*.JPG);; All files (*)')[0]
+        save_file = QFileDialog.getSaveFileName(None, "Save File", "" ,filter='JPEG files (*.JPG);; All files (*)')[0]
         # Replace
-        if save_file and os.path.exists("IMG_.JPG"):
-            os.replace("IMG_.JPG", save_file)
+        if save_file and os.path.exists("temp_img.JPG"):
+            os.replace("temp_img.JPG", save_file)
 
-    # Check box - N17T10_2024
+    # Check box - N26T9_25
     def checkbox(self):
         if self.uic_3dit_Im4g3.b0x_ins3rt.isChecked():
             self.ins3rt_d3l3t3 = "insert"
             self.uic_3dit_Im4g3.b0x_d3l3t3.setChecked(False)
-
-        elif self.uic_3dit_Im4g3.b0x_d3l3t3.isChecked():
+        else:
             self.ins3rt_d3l3t3 = "delete"
             self.uic_3dit_Im4g3.b0x_ins3rt.setChecked(False)
 
-    # Open File - N17T10_2024
+
+    # Open File - N26T9_2025
     def Edit_Image_Open(self):
-        self.im4g3 = QFileDialog.getOpenFileName(None, "Select File" ,filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
+        self.im4g3 = QFileDialog.getOpenFileName(None, "Select File" , filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
         # Delete File & clear
-        if os.path.exists("IMG_.JPG"):
-            os.remove("IMG_.JPG")
+        if os.path.exists("temp_img.JPG"):
+            os.remove("temp_img.JPG")
         self.uic_3dit_Im4g3.label.clear()
 
         # View
-        if self.im4g3 != "":
+        if self.im4g3:
             self.uic_3dit_Im4g3.label.setPixmap(QPixmap(self.im4g3))
 
     # main - N17T10_2024
@@ -487,11 +523,11 @@ class MainWindow:
         y  = str(self.uic_3dit_Im4g3.slider_y.value()) # ánh sáng    cdelta 0
         blocks = self.uic_3dit_Im4g3.spinBox.value()
 
-        fil30 = "IMG_.JPG"
+        fil30 = "temp_img.JPG"
 
         # Run JpegRepair
-        if self.im4g3 != "":
-            if self.ins3rt_d3l3t3 != "":
+        if self.im4g3:
+            if self.ins3rt_d3l3t3:
                 pr0c = ["./Tool/JpegRepair.exe", self.im4g3, fil30, "dest",str(0),str(0),str(self.ins3rt_d3l3t3),str(blocks), "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
 
             else:
