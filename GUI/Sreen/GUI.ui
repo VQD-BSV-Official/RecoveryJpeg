@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1017</width>
-    <height>664</height>
+    <width>1134</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,6 +39,18 @@
          <font>
           <pointsize>10</pointsize>
          </font>
+        </property>
+        <property name="resizeMode">
+         <enum>QListView::Fixed</enum>
+        </property>
+        <property name="gridSize">
+         <size>
+          <width>128</width>
+          <height>128</height>
+         </size>
+        </property>
+        <property name="viewMode">
+         <enum>QListView::ListMode</enum>
         </property>
        </widget>
        <widget class="QLabel" name="label">
@@ -101,7 +113,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1017</width>
+     <width>1134</width>
      <height>22</height>
     </rect>
    </property>
@@ -146,15 +158,6 @@
    <addaction name="menuFile"/>
    <addaction name="menuImage"/>
    <addaction name="menuHelp"/>
-  </widget>
-  <widget class="QStatusBar" name="statusBar">
-   <property name="font">
-    <font>
-     <pointsize>10</pointsize>
-     <italic>false</italic>
-     <bold>false</bold>
-    </font>
-   </property>
   </widget>
   <action name="open_file">
    <property name="text">
