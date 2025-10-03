@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1013</width>
-    <height>456</height>
+    <width>1031</width>
+    <height>481</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,10 +20,10 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>18</x>
-     <y>15</y>
-     <width>691</width>
-     <height>425</height>
+     <x>8</x>
+     <y>9</y>
+     <width>701</width>
+     <height>461</height>
     </rect>
    </property>
    <property name="cursor">
@@ -44,8 +44,8 @@
     <rect>
      <x>720</x>
      <y>7</y>
-     <width>281</width>
-     <height>434</height>
+     <width>301</width>
+     <height>461</height>
     </rect>
    </property>
    <property name="font">
@@ -75,7 +75,7 @@
      <enum>Qt::Vertical</enum>
     </property>
    </widget>
-   <widget class="QLabel" name="label_3">
+   <widget class="QLabel" name="lc_cb">
     <property name="geometry">
      <rect>
       <x>125</x>
@@ -131,7 +131,7 @@
      <enum>Qt::Vertical</enum>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
+   <widget class="QLabel" name="lc_cr">
     <property name="geometry">
      <rect>
       <x>220</x>
@@ -152,7 +152,7 @@
      <pixmap>C:/Users/bevis/Desktop/red.jpg</pixmap>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+   <widget class="QLabel" name="lc_y">
     <property name="geometry">
      <rect>
       <x>30</x>
@@ -215,9 +215,9 @@
    <widget class="QCheckBox" name="b0x_ins3rt">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>220</x>
       <y>340</y>
-      <width>71</width>
+      <width>81</width>
       <height>20</height>
      </rect>
     </property>
@@ -231,7 +231,7 @@
      <string>Insert</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_8">
+   <widget class="QLabel" name="l_block">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -247,7 +247,7 @@
    <widget class="QSpinBox" name="spinBox">
     <property name="geometry">
      <rect>
-      <x>70</x>
+      <x>80</x>
       <y>320</y>
       <width>131</width>
       <height>22</height>
@@ -260,9 +260,9 @@
    <widget class="QCheckBox" name="b0x_d3l3t3">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>220</x>
       <y>320</y>
-      <width>71</width>
+      <width>81</width>
       <height>20</height>
      </rect>
     </property>
@@ -281,7 +281,7 @@
      <rect>
       <x>10</x>
       <y>310</y>
-      <width>261</width>
+      <width>281</width>
       <height>16</height>
      </rect>
     </property>
@@ -289,10 +289,10 @@
      <enum>Qt::Horizontal</enum>
     </property>
    </widget>
-   <widget class="QSpinBox" name="spinBox_2">
+   <widget class="QSpinBox" name="sbox_mcu_x">
     <property name="geometry">
      <rect>
-      <x>70</x>
+      <x>80</x>
       <y>360</y>
       <width>61</width>
       <height>22</height>
@@ -302,7 +302,7 @@
      <number>999</number>
     </property>
    </widget>
-   <widget class="QLabel" name="label_9">
+   <widget class="QLabel" name="l_mcu">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -312,13 +312,13 @@
      </rect>
     </property>
     <property name="text">
-     <string>Mcu X:Y</string>
+     <string>MCU X:Y</string>
     </property>
    </widget>
-   <widget class="QSpinBox" name="spinBox_3">
+   <widget class="QSpinBox" name="sbox_mcu_y">
     <property name="geometry">
      <rect>
-      <x>140</x>
+      <x>150</x>
       <y>360</y>
       <width>61</width>
       <height>22</height>
@@ -332,8 +332,8 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>380</y>
-      <width>261</width>
+      <y>410</y>
+      <width>281</width>
       <height>16</height>
      </rect>
     </property>
@@ -344,8 +344,8 @@
    <widget class="QPushButton" name="b_Save">
     <property name="geometry">
      <rect>
-      <x>200</x>
-      <y>400</y>
+      <x>220</x>
+      <y>430</y>
       <width>71</width>
       <height>25</height>
      </rect>
@@ -364,7 +364,7 @@
     <property name="geometry">
      <rect>
       <x>90</x>
-      <y>400</y>
+      <y>430</y>
       <width>75</width>
       <height>26</height>
      </rect>
@@ -383,7 +383,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>400</y>
+      <y>430</y>
       <width>75</width>
       <height>26</height>
      </rect>
@@ -398,12 +398,12 @@
      <string>View</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="b_pos">
     <property name="geometry">
      <rect>
-      <x>210</x>
+      <x>220</x>
       <y>360</y>
-      <width>61</width>
+      <width>71</width>
       <height>24</height>
      </rect>
     </property>
@@ -414,6 +414,63 @@
     </property>
     <property name="text">
      <string>pos...</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="sbox_pixel_h">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>390</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>999</number>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="sbox_pixel_w">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>390</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="maximum">
+     <number>999</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="l_pixel">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>390</y>
+      <width>61</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>PIXEL W:H</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="b_auto">
+    <property name="geometry">
+     <rect>
+      <x>220</x>
+      <y>390</y>
+      <width>71</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>auto...</string>
     </property>
    </widget>
   </widget>
