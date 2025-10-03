@@ -1,4 +1,10 @@
+"""1. Thay header lớn hơn kích thước ảnh -> xám ở đáy -> bé hơn
+    2. Thay header bé hơn không -> xám ở đáy -> lớn hơn"""
+
+
+
 import sys, os, subprocess, binascii, shutil
+
 
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QSize
@@ -6,6 +12,7 @@ from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QListView
 
 from Run.read_data import read_data
+from Run.view_mcu import MCUViewer
 
 from GUI.Sreen.GUI import Ui_MainWindow
 from GUI.Widget.About import Ui_About
@@ -195,8 +202,8 @@ class MainWindow:
 
 
             else:
-                pass
                 # print("Không thể tải dữ liệu hình ảnh!")
+                pass
 
 
 # ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
@@ -470,13 +477,15 @@ class MainWindow:
         # Value
         self.im4g3 = self.ins3rt_d3l3t3 = ""
 
-        if self.image != '':
-            self.uic_3dit_Im4g3.label.setPixmap(QPixmap(self.image))
-            self.im4g3 = self.image
+        if self.image:
+            pix = QPixmap(self.image)
+            self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
 
         self.uic_3dit_Im4g3.b_Open.clicked.connect(self.Edit_Image_Open)
         self.uic_3dit_Im4g3.b_Save.clicked.connect(self.Edit_Image_Save)
         self.uic_3dit_Im4g3.b_View.clicked.connect(self.Edit_Image_View)
+
+        self.uic_3dit_Im4g3.b_pos.clicked.connect(lambda: self.view_mcu_main())
 
         self.uic_3dit_Im4g3.b0x_d3l3t3.clicked.connect(self.checkbox)
         self.uic_3dit_Im4g3.b0x_ins3rt.clicked.connect(self.checkbox)
@@ -519,23 +528,30 @@ class MainWindow:
 
             # self.uic_3dit_Im4g3.label.setPixmap(QPixmap(self.im4g3))
 
+    def view_mcu_main(self):
+        self.mcu_viewer = MCUViewer()
+        self.mcu_viewer.show()
+
+        
     # main - N17T10_2024
     def Edit_Image_View(self):
         # Quy đổi giá trị & gán vào biến
         cr = str(self.uic_3dit_Im4g3.slider_cr.value()) # màu đỏ    cdelta 2
         cb = str(self.uic_3dit_Im4g3.slider_cb.value()) # màu xanh  cdelta 1
         y  = str(self.uic_3dit_Im4g3.slider_y.value()) # ánh sáng    cdelta 0
-        blocks = self.uic_3dit_Im4g3.spinBox.value()
+
+        blocks = str(self.uic_3dit_Im4g3.spinBox.value())
+        mcu_x = str(self.uic_3dit_Im4g3.sbox_mcu_x.value())
+        mcu_y = str(self.uic_3dit_Im4g3.sbox_mcu_y.value())
+        pixel_h = str(self.uic_3dit_Im4g3.sbox_pixel_h.value())
+        pixel_w = str(self.uic_3dit_Im4g3.sbox_pixel_w.value())
 
         fil30 = "temp_img.JPG"
 
         # Run JpegRepair
         if self.im4g3:
-            if self.ins3rt_d3l3t3:
-                pr0c = ["./Tool/JpegRepair.exe", self.im4g3, fil30, "dest",str(0),str(0),str(self.ins3rt_d3l3t3),str(blocks), "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-
-            else:
-                pr0c = ["./Tool/JpegRepair.exe", self.im4g3, fil30,"cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+            #                                file in        file out
+            pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
             
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
