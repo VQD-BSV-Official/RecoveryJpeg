@@ -53,7 +53,7 @@ class Ui_About(object):
     def retranslateUi(self, About):
         _translate = QtCore.QCoreApplication.translate
         About.setWindowTitle(_translate("About", "About"))
-        self.label_2.setText(_translate("About", "RecoveryJpeg v1.5.0"))
+        self.label_2.setText(_translate("About", "RecoveryJpeg v1.6.0"))
         self.label_3.setText(_translate("About", "<html><head/><body><p><span style=\" font-weight:700;\">Author &amp; Developed by: </span><a href=\"https://www.facebook.com/QuangDaiVQD\"><span style=\" font-weight:700; text-decoration: underline; color:#0000ff;\">Vũ Quang Đại</span></a><br/></p></body></html>"))
         self.textBrowser.setHtml(_translate("About", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><meta charset=\"utf-8\" /><style type=\"text/css\">\n"

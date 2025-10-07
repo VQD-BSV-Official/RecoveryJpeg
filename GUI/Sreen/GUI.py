@@ -146,7 +146,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "RecoveryJpeg v1.5.0"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "RecoveryJpeg v1.6.0"))
         self.label_Copyright.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:700;\">Author &amp; Developed by: </span><a href=\"https://www.facebook.com/QuangDaiVQD\"><span style=\" font-weight:700; text-decoration: underline; color:#0000ff;\">Vũ Quang Đại</span></a><br/></p></body></html>"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuOpen.setTitle(_translate("MainWindow", "Open"))

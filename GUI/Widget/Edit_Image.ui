@@ -299,7 +299,7 @@
      </rect>
     </property>
     <property name="maximum">
-     <number>999</number>
+     <number>9999</number>
     </property>
    </widget>
    <widget class="QLabel" name="l_mcu">
@@ -325,7 +325,7 @@
      </rect>
     </property>
     <property name="maximum">
-     <number>999</number>
+     <number>9999</number>
     </property>
    </widget>
    <widget class="Line" name="line_2">
@@ -426,7 +426,7 @@
      </rect>
     </property>
     <property name="maximum">
-     <number>999</number>
+     <number>9999</number>
     </property>
    </widget>
    <widget class="QSpinBox" name="sbox_pixel_w">
@@ -439,7 +439,7 @@
      </rect>
     </property>
     <property name="maximum">
-     <number>999</number>
+     <number>9999</number>
     </property>
    </widget>
    <widget class="QLabel" name="l_pixel">
