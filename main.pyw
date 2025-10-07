@@ -116,9 +116,9 @@ class MainWindow:
 
 
         # Nếu giống với lần trước thì bỏ qua
-        if hasattr(self, "last_range") and self.last_range == (self.start, self.end):
-            return
-        self.last_range = (self.start, self.end)
+        # if hasattr(self, "last_range") and self.last_range == (self.start, self.end):
+        #     return
+        # self.last_range = (self.start, self.end)
 
 
         with open(self.image, "rb") as file:
@@ -156,9 +156,14 @@ class MainWindow:
 
 # ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     # Delete file - N3T9_25
-    def delete(self):
-        for file in ["temp_rp", "temp_rp.raw"]:
-            if os.path.exists(file): os.remove(file)
+    def delete(self, count = None):
+        if count == 2:
+            for file in ["blank.jpg", "header_out"]:
+                if os.path.exists(file): os.remove(file)            
+
+        else:
+            for file in ["temp_rp", "temp_rp.raw"]:
+                if os.path.exists(file): os.remove(file)
 
 
     # View image (label) - N3T9_25
@@ -284,7 +289,7 @@ class MainWindow:
 
     # Open File - N26T9_25
     def open_file(self):
-        self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;JPEG files (*.JPEG *.JPG);;All files (*)')[0]
+        self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;All files (*)')[0]
         # Reset list & label
         self.uic.listWidget.clear()
         self.uic.label.clear()
@@ -419,6 +424,8 @@ class MainWindow:
         # Exit
         self.uic_about.b_OK.clicked.connect(lambda: self.about.close())
 
+# ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
     # Create New - N16T10_24
     def show_Create_New(self):
@@ -427,21 +434,82 @@ class MainWindow:
         self.uic_Create_New.setupUi(self.Create_New)
         self.Create_New.show()
 
+        self.uic_Create_New.b_add.clicked.connect(self.add_create)
+
         # OK & Exit
         self.uic_Create_New.b_OK.clicked.connect(self.Create_New_OK)
         self.uic_Create_New.b_Cancel.clicked.connect(lambda: self.Create_New.close())
 
-    # OK (main) - N17T10_2024
+
+    def add_create(self):
+        w, h = self.uic_Create_New.ledit_pixel_w.text(), self.uic_Create_New.ledit_pixel_h.text()
+
+        byte000x = self.uic_Create_New.cbox_dqt.currentText()
+        byte2x = self.uic_Create_New.cbox_fac.currentText()
+
+        item = f"{byte000x} - {w} x {h} - {byte2x}"
+
+        # Nếu có rồi bỏ qua
+        if self.uic_Create_New.listWidget.findItems(item, Qt.MatchFlag.MatchExactly): pass
+        else: self.uic_Create_New.listWidget.addItem(item)
+
+    # OK (main) - N10T5_25
     def Create_New_OK(self):
         # Exit & delete file
         self.delete()
         self.Create_New.close()
         
+        selected_item = self.uic_Create_New.listWidget.currentItem()  # Lấy item được chọn
+        if selected_item.text() != "Auto":
+            # text = selected_item.text()  # Lấy văn bản của item
+            # print(f"Item được chọn: {text}")
+            # Tách chuỗi dựa trên dấu " - " và " x "
+            text = selected_item.text()
+            parts = text.replace(" x ", " - ").split(" - ")
+
+            # Gán giá trị cho các biến
+            byte000x = parts[0].strip()  # "0001" or 0002
+            w, h = parts[1].strip(), parts[2].strip() # 6000x4000
+            byte2x = parts[3].strip()    # 21 or 22
+
+
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            # RUN
+            pr0c = subprocess.Popen(["./Tool/create_header.exe", byte000x, w, h, byte2x], startupinfo=startupinfo)
+            while pr0c.poll() is None:
+                QtWidgets.QApplication.processEvents()
+            pr0c.wait()
+
+
+            with open(f'header_out', 'rb') as r:
+                data_header = r.read()
+
+            if self.uic_Create_New.checkBox.isChecked() == True:
+                # Read file & Write from x25805
+                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
+                    f2.write(data_header + f1.read()[153605:None])
+
+            else:
+                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
+                    f2.write(data_header + f1.read())
+
+            self.delete(2)
+            self.image = "temp_rp"
+            # print("Chay file main")
+            self.main()
+
+
+
         # Using JpegRecovery
-        if self.uic_Create_New.checkBox.isChecked() == True:
+        else:
             # Read file & Write from x25805
-            with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
-                f2.write(f1.read()[153605:None])
+            if self.uic_Create_New.checkBox.isChecked() == True:
+                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
+                    f2.write(f1.read()[153605:None])
+            else:
+                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
+                    f2.write(f1.read())                
 
             self.uic.textEdit.append(f'🔍 Please wait for image processing')
 
@@ -478,8 +546,12 @@ class MainWindow:
         self.im4g3 = self.ins3rt_d3l3t3 = ""
 
         if self.image:
+            self.im4g3 = self.image
+
             pix = QPixmap(self.image)
             self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
+            self.uic_3dit_Im4g3.sbox_pixel_h.setValue(pix.height())
+            self.uic_3dit_Im4g3.sbox_pixel_w.setValue(pix.width())
 
         self.uic_3dit_Im4g3.b_Open.clicked.connect(self.Edit_Image_Open)
         self.uic_3dit_Im4g3.b_Save.clicked.connect(self.Edit_Image_Save)
@@ -526,6 +598,9 @@ class MainWindow:
             pix = QPixmap(self.im4g3)
             self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
 
+            self.uic_3dit_Im4g3.sbox_pixel_h.setValue(pix.height())
+            self.uic_3dit_Im4g3.sbox_pixel_w.setValue(pix.width())
+
             # self.uic_3dit_Im4g3.label.setPixmap(QPixmap(self.im4g3))
 
     def view_mcu_main(self):
@@ -543,16 +618,20 @@ class MainWindow:
         blocks = str(self.uic_3dit_Im4g3.spinBox.value())
         mcu_x = str(self.uic_3dit_Im4g3.sbox_mcu_x.value())
         mcu_y = str(self.uic_3dit_Im4g3.sbox_mcu_y.value())
-        pixel_h = str(self.uic_3dit_Im4g3.sbox_pixel_h.value())
-        pixel_w = str(self.uic_3dit_Im4g3.sbox_pixel_w.value())
+        # pixel_h = str(self.uic_3dit_Im4g3.sbox_pixel_h.value())
+        # pixel_w = str(self.uic_3dit_Im4g3.sbox_pixel_w.value())
 
         fil30 = "temp_img.JPG"
 
         # Run JpegRepair
         if self.im4g3:
             #                                file in        file out
-            pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+            if self.ins3rt_d3l3t3:
+                pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
             
+            else: 
+                pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             subprocess.Popen(pr0c, startupinfo=startupinfo)   
