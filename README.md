@@ -4,7 +4,7 @@
 
 *Recover your precious photos. There are 3 ways to repair: Extract thumbnails, replace header (FF DA), Concatenate MCUs in file structure. I learned how to repair corrupted images in more depth, I learned from the sources: [JpegRepair](https://github.com/dmahurin/jpegrepair), [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp), [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)*
 
-```You can contact me via gmail (email) to save the files you need. This will cost you a fee, thank you. If you have any problems or questions here => https://github.com/VQD-BSV/RecoveryJpeg/issues, I will reply as soon as possible.```
+```You can contact me via gmail (email) to save the files you need. This will cost you a fee, thank you. If you have any problems or questions here => https://github.com/VQD-BSV-Official/RecoveryJpeg/issues, I will reply as soon as possible.```
 
 ## Usage
 ![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
