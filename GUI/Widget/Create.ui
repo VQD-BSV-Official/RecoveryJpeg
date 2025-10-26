@@ -305,7 +305,7 @@
      <rect>
       <x>370</x>
       <y>20</y>
-      <width>68</width>
+      <width>81</width>
       <height>22</height>
      </rect>
     </property>
@@ -325,18 +325,28 @@
      <rect>
       <x>370</x>
       <y>50</y>
-      <width>68</width>
+      <width>81</width>
       <height>22</height>
      </rect>
     </property>
     <item>
      <property name="text">
-      <string>21</string>
+      <string>22 | 4:2:0</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>22</string>
+      <string>21 | 4:2:2</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>11 | 4:4:4</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>41 | 4:1:1</string>
      </property>
     </item>
    </widget>
