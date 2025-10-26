@@ -1,10 +1,11 @@
 """1. Thay header lớn hơn kích thước ảnh -> xám ở đáy -> bé hơn
     2. Thay header bé hơn không -> xám ở đáy -> lớn hơn"""
 
-
-
 import sys, os, subprocess, binascii, shutil
 
+# Proce Image
+from PIL import Image, ImageFile
+from io import BytesIO
 
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QSize
@@ -25,6 +26,7 @@ class MainWindow:
         self.uic = Ui_MainWindow()
         self.uic.setupUi(self.main_win)
 
+        ImageFile.LOAD_TRUNCATED_IMAGES = True
 
         # //////////////////////////////////////////
         # //////////////////////////////////////////
@@ -114,20 +116,20 @@ class MainWindow:
         ioffset = item_off # .text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
         self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
 
-
-        # Nếu giống với lần trước thì bỏ qua
-        # if hasattr(self, "last_range") and self.last_range == (self.start, self.end):
-        #     return
-        # self.last_range = (self.start, self.end)
-
-
         with open(self.image, "rb") as file:
             file.seek(self.start) # Di chỏ đến offset
             data = file.read(self.end - self.start)
             h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-            
-            pixmap = QPixmap() # Load byte (image)
-            pixmap.loadFromData(h34d3r + data)
+
+            # Code beta
+            raw_data = h34d3r + data
+            img = Image.open(BytesIO(raw_data)).convert("RGB")
+            w, h = img.size
+            qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+            pixmap = QPixmap.fromImage(qimg)            
+
+            # pixmap = QPixmap() # Load byte (image)
+            # pixmap.loadFromData(h34d3r + data)
 
             w = pixmap.width(); h = pixmap.height()
 
@@ -148,11 +150,12 @@ class MainWindow:
             list_offset = read_data(self.image)
 
             if list_offset != []:
+                self.uic.textEdit.insertPlainText("..................Have")
                 for offset in list_offset:
                     self.add_image(offset)
                     # self.uic.listWidget.addItem(offset)
 
-            else: self.uic.textEdit.append("Nothing..................")
+            else: self.uic.textEdit.insertPlainText("..................Nothing")
 
 # ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     # Delete file - N3T9_25
@@ -196,7 +199,8 @@ class MainWindow:
             file.seek(self.start) # Di chỏ đến offset
             data = file.read(self.end - self.start)
             h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-            
+
+
             pixmap = QPixmap() # Load byte (image)
             if pixmap.loadFromData(h34d3r + data):
                 # View image
@@ -207,6 +211,19 @@ class MainWindow:
 
 
             else:
+                # Code beta
+                raw_data = h34d3r + data
+                img = Image.open(BytesIO(raw_data)).convert("RGB")
+                w, h = img.size
+                qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+                pixmap = QPixmap.fromImage(qimg)
+
+                self.uic.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic.label.width(), self.uic.label.height(), pixmap)))
+
+                self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
+                self.uic.label.setScaledContents(False)
+
+
                 # print("Không thể tải dữ liệu hình ảnh!")
                 pass
 
@@ -465,12 +482,13 @@ class MainWindow:
             # print(f"Item được chọn: {text}")
             # Tách chuỗi dựa trên dấu " - " và " x "
             text = selected_item.text()
+            text = text.split("|")[0].strip()
             parts = text.replace(" x ", " - ").split(" - ")
 
             # Gán giá trị cho các biến
             byte000x = parts[0].strip()  # "0001" or 0002
             w, h = parts[1].strip(), parts[2].strip() # 6000x4000
-            byte2x = parts[3].strip()    # 21 or 22
+            byte2x = parts[3].strip()    # 21 or 22, 11, 41
 
 
             startupinfo = subprocess.STARTUPINFO()
@@ -534,13 +552,12 @@ class MainWindow:
 
 # ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 # ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-    # Edit Image - N17T10_24
+    # Edit Image - N26T10_25
     def show_Edit_Image(self):
-        self.Sr33n_3dit_Im4g3 = QMainWindow()
-        self.uic_3dit_Im4g3 = Ui_Edit_Image()
-        self.uic_3dit_Im4g3.setupUi(self.Sr33n_3dit_Im4g3)
-        self.Sr33n_3dit_Im4g3.show()
+        self.sr_edit_image = QMainWindow()
+        self.uic_edit_image = Ui_Edit_Image()
+        self.uic_edit_image.setupUi(self.sr_edit_image)
+        self.sr_edit_image.show()
 
         # Value
         self.im4g3 = self.ins3rt_d3l3t3 = ""
@@ -549,77 +566,100 @@ class MainWindow:
             self.im4g3 = self.image
 
             pix = QPixmap(self.image)
-            self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
-            self.uic_3dit_Im4g3.sbox_pixel_h.setValue(pix.height())
-            self.uic_3dit_Im4g3.sbox_pixel_w.setValue(pix.width())
+            self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pix)))
+            self.uic_edit_image.sbox_pixel_h.setValue(pix.height())
+            self.uic_edit_image.sbox_pixel_w.setValue(pix.width())
 
-        self.uic_3dit_Im4g3.b_Open.clicked.connect(self.Edit_Image_Open)
-        self.uic_3dit_Im4g3.b_Save.clicked.connect(self.Edit_Image_Save)
-        self.uic_3dit_Im4g3.b_View.clicked.connect(self.Edit_Image_View)
+        self.uic_edit_image.b_Open.clicked.connect(self.EI_Open)
+        self.uic_edit_image.b_Save.clicked.connect(self.EI_Save)
+        self.uic_edit_image.b_View.clicked.connect(self.EI_View)
 
-        self.uic_3dit_Im4g3.b_pos.clicked.connect(lambda: self.view_mcu_main())
+        self.uic_edit_image.b_pos.clicked.connect(lambda: self.EI_view_mcu())
 
-        self.uic_3dit_Im4g3.b0x_d3l3t3.clicked.connect(self.checkbox)
-        self.uic_3dit_Im4g3.b0x_ins3rt.clicked.connect(self.checkbox)
+        self.uic_edit_image.b0x_d3l3t3.clicked.connect(self.EI_checkbox)
+        self.uic_edit_image.b0x_ins3rt.clicked.connect(self.EI_checkbox)
 
         # Change num in slider
-        self.uic_3dit_Im4g3.slider_cr.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_cr.setText(f"Cr = {self.uic_3dit_Im4g3.slider_cr.value()}"))
-        self.uic_3dit_Im4g3.slider_cb.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_cb.setText(f"Cb = {self.uic_3dit_Im4g3.slider_cb.value()}"))
-        self.uic_3dit_Im4g3.slider_y.valueChanged.connect(lambda link: self.uic_3dit_Im4g3.l_y.setText(f"Y = {self.uic_3dit_Im4g3.slider_y.value()}"))
+        self.uic_edit_image.slider_cr.valueChanged.connect(lambda link: self.uic_edit_image.l_cr.setText(f"Cr = {self.uic_edit_image.slider_cr.value()}"))
+        self.uic_edit_image.slider_cb.valueChanged.connect(lambda link: self.uic_edit_image.l_cb.setText(f"Cb = {self.uic_edit_image.slider_cb.value()}"))
+        self.uic_edit_image.slider_y.valueChanged.connect(lambda link: self.uic_edit_image.l_y.setText(f"Y = {self.uic_edit_image.slider_y.value()}"))
 
     # Save - N26T9_25
-    def Edit_Image_Save(self):
+    def EI_Save(self):
         save_file = QFileDialog.getSaveFileName(None, "Save File", "" ,filter='JPEG files (*.JPG);; All files (*)')[0]
-        # Replace
+        # Replace - Cho phép di chuyển khi các phân vùng
         if save_file and os.path.exists("temp_img.JPG"):
             shutil.copy("temp_img.JPG", save_file)
 
     # Check box - N26T9_25
-    def checkbox(self):
-        if self.uic_3dit_Im4g3.b0x_ins3rt.isChecked():
+    def EI_checkbox(self):
+        if self.uic_edit_image.b0x_ins3rt.isChecked():
             self.ins3rt_d3l3t3 = "insert"
-            self.uic_3dit_Im4g3.b0x_d3l3t3.setChecked(False)
+            self.uic_edit_image.b0x_d3l3t3.setChecked(False)
         else:
             self.ins3rt_d3l3t3 = "delete"
-            self.uic_3dit_Im4g3.b0x_ins3rt.setChecked(False)
-
+            self.uic_edit_image.b0x_ins3rt.setChecked(False)
 
     # Open File - N26T9_2025
-    def Edit_Image_Open(self):
+    def EI_Open(self):
         self.im4g3 = QFileDialog.getOpenFileName(None, "Select File" , filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
         # Delete File & clear
         if os.path.exists("temp_img.JPG"):
             os.remove("temp_img.JPG")
-        self.uic_3dit_Im4g3.label.clear()
+        self.uic_edit_image.label.clear()
 
         
         # View
         if self.im4g3:
-            pix = QPixmap(self.im4g3)
-            self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
+            with open(self.im4g3, "rb") as f:
+                raw_data = f.read()
 
-            self.uic_3dit_Im4g3.sbox_pixel_h.setValue(pix.height())
-            self.uic_3dit_Im4g3.sbox_pixel_w.setValue(pix.width())
+                # raw_data = h34d3r + data
+                img = Image.open(BytesIO(raw_data)).convert("RGB")
+                w, h = img.size
+                qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+                pixmap = QPixmap.fromImage(qimg)
 
-            # self.uic_3dit_Im4g3.label.setPixmap(QPixmap(self.im4g3))
+                self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
 
-    def view_mcu_main(self):
+                # self.uic_edit_image.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
+                # self.uic_edit_image.label.setScaledContents(False)
+
+            #  self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), QPixmap(fil30))))
+
+            # self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
+            # self.uic.label.setScaledContents(False)
+
+
+            # pix =  QPixmap(self.im4g3)
+            # self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pix)))
+
+            self.uic_edit_image.sbox_pixel_h.setValue(h)
+            self.uic_edit_image.sbox_pixel_w.setValue(w)
+
+            # self.uic_edit_image.label.setPixmap(QPixmap(self.im4g3))
+
+    def EI_view_mcu(self):
         self.mcu_viewer = MCUViewer()
         self.mcu_viewer.show()
-
         
     # main - N17T10_2024
-    def Edit_Image_View(self):
+    def EI_View(self):
         # Quy đổi giá trị & gán vào biến
-        cr = str(self.uic_3dit_Im4g3.slider_cr.value()) # màu đỏ    cdelta 2
-        cb = str(self.uic_3dit_Im4g3.slider_cb.value()) # màu xanh  cdelta 1
-        y  = str(self.uic_3dit_Im4g3.slider_y.value()) # ánh sáng    cdelta 0
+        # cr = str(self.uic_edit_image.slider_cr.value()) # màu đỏ    cdelta 2
+        # cb = str(self.uic_edit_image.slider_cb.value()) # màu xanh  cdelta 1
+        # y  = str(self.uic_edit_image.slider_y.value()) # ánh sáng    cdelta 0
 
-        blocks = str(self.uic_3dit_Im4g3.spinBox.value())
-        mcu_x = str(self.uic_3dit_Im4g3.sbox_mcu_x.value())
-        mcu_y = str(self.uic_3dit_Im4g3.sbox_mcu_y.value())
-        # pixel_h = str(self.uic_3dit_Im4g3.sbox_pixel_h.value())
-        # pixel_w = str(self.uic_3dit_Im4g3.sbox_pixel_w.value())
+        ui = self.uic_edit_image # Code rút gọn
+        cr, cb, y = map(lambda s: str(s.value()), [ui.slider_cr, ui.slider_cb, ui.slider_y])
+        blocks, mcu_x, mcu_y = map(lambda s: str(s.value()), [ui.spinBox, ui.sbox_mcu_x, ui.sbox_mcu_y])
+
+        # blocks = str(self.uic_edit_image.spinBox.value())
+        # mcu_x = str(self.uic_edit_image.sbox_mcu_x.value())
+        # mcu_y = str(self.uic_edit_image.sbox_mcu_y.value())
+
+        # pixel_h = str(self.uic_edit_image.sbox_pixel_h.value())
+        # pixel_w = str(self.uic_edit_image.sbox_pixel_w.value())
 
         fil30 = "temp_img.JPG"
 
@@ -635,9 +675,11 @@ class MainWindow:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             subprocess.Popen(pr0c, startupinfo=startupinfo)   
-            # RUN & View
-            pix = QPixmap(fil30)
-            self.uic_3dit_Im4g3.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_3dit_Im4g3.label.width(), self.uic_3dit_Im4g3.label.height(), pix)))
+            # View
+            self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), QPixmap(fil30))))
+
+
+
 
     def show(self):
         self.main_win.show()
