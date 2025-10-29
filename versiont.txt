@@ -17,10 +17,11 @@ VSVersionInfo(
         [StringStruct('FileDescription',  'Recovery JPEG Tool'),
          StringStruct('LegalCopyright',   '(c) 2024 Vũ Quang Đại'),
          StringStruct('ProductName',      'RecoveryJpeg'),
-         StringStruct('ProductVersion',   '1.6.0')
+         StringStruct('ProductVersion',   '1.7.0')
         ]
       )]
     ),
     VarFileInfo([VarStruct('Translation', [1033, 1200])]) 
   ]  
+
 )
