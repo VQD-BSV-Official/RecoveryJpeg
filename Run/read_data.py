@@ -24,12 +24,22 @@ def read_data(image):
             if not buf: # Đọc đến hết
                 break
 
+
             idx = buf.find(b'\xFF\xDB\x00\x84')
             if idx < 0: # Tìm 2 điểm bắt đầu
                 idx = buf.find(b'\xFF\xDB\x00\x43')
                 if idx < 0:
                     dump.seek(pos + 1024)
                     continue
+
+            # Fix error (header FFC4)
+            idx_2 = buf.find(b'\xFF\xC4')
+            if idx_2 < 0: pass
+            else: 
+                if idx_2 < idx: idx = idx_2
+
+            # print(idx_2)
+
 
             dump.seek(offset_start := pos + idx)
 
