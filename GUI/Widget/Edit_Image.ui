@@ -90,7 +90,7 @@
      </font>
     </property>
     <property name="pixmap">
-     <pixmap>C:/Users/bevis/Desktop/green.jpg</pixmap>
+     <pixmap>./green.jpg</pixmap>
     </property>
    </widget>
    <widget class="QSlider" name="slider_cb">
@@ -149,7 +149,7 @@
      <string/>
     </property>
     <property name="pixmap">
-     <pixmap>C:/Users/bevis/Desktop/red.jpg</pixmap>
+     <pixmap>./red.jpg</pixmap>
     </property>
    </widget>
    <widget class="QLabel" name="lc_y">
@@ -170,7 +170,7 @@
      <enum>QFrame::NoFrame</enum>
     </property>
     <property name="pixmap">
-     <pixmap>C:/Users/bevis/Desktop/white.jpg</pixmap>
+     <pixmap>./white.jpg</pixmap>
     </property>
    </widget>
    <widget class="QLabel" name="l_y">

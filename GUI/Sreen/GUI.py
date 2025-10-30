@@ -124,6 +124,8 @@ class Ui_MainWindow(object):
         self.Restart_Software.setObjectName("Restart_Software")
         self.actionHi = QtGui.QAction(parent=MainWindow)
         self.actionHi.setObjectName("actionHi")
+        self.Decode = QtGui.QAction(parent=MainWindow)
+        self.Decode.setObjectName("Decode")
         self.menuOpen.addAction(self.Open_File)
         self.menuOpen.addAction(self.Open_Folder)
         self.menuUsing_Header.addAction(self.None_Hex)
@@ -136,6 +138,8 @@ class Ui_MainWindow(object):
         self.menuImage.addSeparator()
         self.menuImage.addAction(self.Edit_Image)
         self.menuImage.addAction(self.Create_New)
+        self.menuImage.addSeparator()
+        self.menuImage.addAction(self.Decode)
         self.menuHelp.addAction(self.About)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuImage.menuAction())
@@ -146,7 +150,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "RecoveryJpeg v1.7.0"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "RecoveryJpeg v1.8.0"))
         self.label_Copyright.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:700;\">Author &amp; Developed by: </span><a href=\"https://www.facebook.com/QuangDaiVQD\"><span style=\" font-weight:700; text-decoration: underline; color:#0000ff;\">Vũ Quang Đại</span></a><br/></p></body></html>"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuOpen.setTitle(_translate("MainWindow", "Open"))
@@ -183,3 +187,4 @@ class Ui_MainWindow(object):
         self.actionOpen_Disk.setText(_translate("MainWindow", "Disk"))
         self.Restart_Software.setText(_translate("MainWindow", "Restart Software"))
         self.actionHi.setText(_translate("MainWindow", "Hi"))
+        self.Decode.setText(_translate("MainWindow", "Decode"))

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>RecoveryJpeg v1.7.0</string>
+   <string>RecoveryJpeg v1.8.0</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -148,6 +148,8 @@
     <addaction name="separator"/>
     <addaction name="Edit_Image"/>
     <addaction name="Create_New"/>
+    <addaction name="separator"/>
+    <addaction name="Decode"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -293,6 +295,11 @@
   <action name="actionHi">
    <property name="text">
     <string>Hi</string>
+   </property>
+  </action>
+  <action name="Decode">
+   <property name="text">
+    <string>Decode</string>
    </property>
   </action>
  </widget>
