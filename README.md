@@ -23,8 +23,6 @@
 > * Good sample file. The file must be the same device or software. <br>
 > The same parameters (Image resolution, device).
 
-> * MacOS - Wine (wine staging) ```wine "name software"```
-
 > [!Important]
 > <img src="https://github.com/user-attachments/assets/e44b917f-01d5-4df4-af07-17703e9b553f" alt="BIDV" width="200" style="max-width: 100%; margin: 0 auto;"> <br>
 > **Donate (Paypal)**: [Do consider donating or buying us a coffee](https://paypal.me/BSVPay)
