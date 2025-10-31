@@ -1,6 +1,6 @@
 """1. Thay header lớn hơn kích thước ảnh -> xám ở đáy -> bé hơn
     2. Thay header bé hơn không -> xám ở đáy -> lớn hơn"""
-import sys, os, subprocess, binascii, shutil
+import sys, os, subprocess, binascii, shutil, time
 
 # Proce Image
 from PIL import Image, ImageFile
@@ -13,6 +13,9 @@ from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget,
 
 from Run.read_data import read_data
 from Run.view_mcu import MCUViewer
+from Run.s0_decode import decode_jpeg
+from Run.s3_delete import delete_mcu
+
 
 from GUI.Sreen.GUI import Ui_MainWindow
 from GUI.Widget.About import Ui_About
@@ -57,6 +60,8 @@ class MainWindow:
         # self.uic.splitter.setStretchFactor(0 , 1) 
         self.uic.splitter.setSizes([400, 100])
         self.uic.splitter_2.setSizes([220, 100])
+
+        self.uic.Decode.triggered.connect(self.decode_image)
 
         # Open File, Folder - N10T10_2024
         self.uic.Open_File.triggered.connect(self.open_file)
@@ -213,7 +218,17 @@ class MainWindow:
 
 # ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 # ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # Save File - N26T9_25
+    # Decode Image - N31T10_25 - OK have check error
+    def decode_image(self):
+        if self.image:
+            decode_jpeg(self.image, os.path.splitext(self.image)[0] + "_decode.jpg")
+            self.uic.textEdit.append("✅ Decode image")
+        else:
+            print("⚠️ Can't Decode")
+
+
+
+    # Save File - N26T9_25 - OK have check error
     def save_file(self):
         self.save_image = QFileDialog.getSaveFileName(None, "Save File", None ,filter='JPEG files (*.JPG);; All files (*)')[0]
         if not (self.save_image and self.image and self.start):
@@ -221,14 +236,25 @@ class MainWindow:
             return
         
         header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043"}
+        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043", b"\xFF\xC4": "FFC4"}
 
         with open(self.image, "rb") as file:
             file.seek(self.start) # Di chỏ đến offset
             cropped_data = file.read(self.end - self.start)
 
-        fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
+        # ////////////////////////////////////////
+        # fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
+        # Tìm marker có offset nhỏ nhất
+        min_offset = None
+        fr0mh3x = None
 
+        for k, v in markers.items():
+            pos = cropped_data.find(k)
+            if pos != -1 and (min_offset is None or pos < min_offset):
+                min_offset = pos
+                fr0mh3x = v
+        # ////////////////////////////////////////
+        # ////////////////////////////////////////
         if fr0mh3x:
             with open(self.save_image, 'wb') as f:
                 f.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
@@ -238,7 +264,7 @@ class MainWindow:
             self.uic.textEdit.append("⚠️ Can't save (marker not found)")
 
 
-    # Export Folder - N26T9_25
+    # Export Folder - N26T9_25 - OK have check error
     def export_folder(self):
         self.export_folder = QFileDialog.getExistingDirectory(None, "Select Folder")
         if not (self.export_folder and self.uic.listWidget.count()):
@@ -246,7 +272,7 @@ class MainWindow:
             return
 
         header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043"}
+        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043", }
 
         with open(self.image, "rb") as f:
             for idx in range(self.uic.listWidget.count()):
@@ -254,7 +280,19 @@ class MainWindow:
                 f.seek(start)
                 cropped_data = f.read(end - start)
 
-                fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
+                # ////////////////////////////////////////
+                # fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
+                # Tìm marker có offset nhỏ nhất
+                min_offset = None
+                fr0mh3x = None
+
+                for k, v in markers.items():
+                    pos = cropped_data.find(k)
+                    if pos != -1 and (min_offset is None or pos < min_offset):
+                        min_offset = pos
+                        fr0mh3x = v
+                # ////////////////////////////////////////
+                # ////////////////////////////////////////
                 if not fr0mh3x:
                     continue  # bỏ qua nếu không tìm thấy marker
 
@@ -265,7 +303,7 @@ class MainWindow:
         self.uic.textEdit.append(f"💾 Export Folder: {self.export_folder}")
 
 
-    # Open Folder - N26T9_25
+    # Open Folder - N26T9_25 - OK have check error
     def open_folder(self):
         self.image = QFileDialog.getExistingDirectory(None, "Select Folder")
         # Reset list & label
@@ -273,6 +311,7 @@ class MainWindow:
         self.uic.label.clear()
 
         if self.image != "":
+            self.uic.textEdit.append(f'📂 Open Folder: {self.image}')
             self.delete()
             # Read folder
             for i in os.listdir(self.image):
@@ -284,11 +323,13 @@ class MainWindow:
             # View & log
             self.uic.textEdit.append(f'📂 Open Folder: {self.image}')
             self.image = "temp_rp"
+        else:
+            self.uic.textEdit.append(f'''⚠️ Can't open folder''')
 
         self.main()
 
 
-    # Open File - N26T9_25
+    # Open File - N26T9_25 - OK have check error
     def open_file(self):
         self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;All files (*)')[0]
         # Reset list & label
@@ -308,7 +349,7 @@ class MainWindow:
     def hex_x25805(self):
         self.image_hex = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
 
-        if self.image_hex != "" and self.image != "":
+        if self.image_hex and self.image:
             self.delete()
             # Open file ref
             with open(self.image_hex, 'rb') as f:
@@ -333,7 +374,7 @@ class MainWindow:
     def RAW(self):
         self.image_raw = QFileDialog.getOpenFileName(None, "Select File", None ,filter='RAW files (*.CR2 *.NEF *.ARW);;All files (*)')[0]
 
-        if self.image_raw != "":
+        if self.image_raw and self.image:
             self.delete()
 
             image_extension = self.image_raw.split('.')[-1].lower()
@@ -400,7 +441,7 @@ class MainWindow:
     def none_Hex(self):
         self.image_hex = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);; All files (*)')[0]
 
-        if self.image_hex != "":
+        if self.image_hex and self.image:
             self.delete()
 
             with open(self.image_hex, 'rb') as f:
@@ -547,9 +588,18 @@ class MainWindow:
         self.im4g3 = self.ins3rt_d3l3t3 = ""
 
         if self.image:
-            self.im4g3 = self.image
+            subprocess.run(['./Tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
 
-            pix = QPixmap(self.image)
+            self.im4g3 = self.image
+            with open(self.image, 'rb') as r:
+                raw_data = r.read()
+                
+            img = Image.open(BytesIO(raw_data)).convert("RGB")
+            w, h = img.size
+            qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+            pix = QPixmap.fromImage(qimg)
+
+            # pix = QPixmap(self.image)
             self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pix)))
             self.uic_edit_image.sbox_pixel_h.setValue(pix.height())
             self.uic_edit_image.sbox_pixel_w.setValue(pix.width())
@@ -593,6 +643,7 @@ class MainWindow:
         
         # View
         if self.im4g3:
+            subprocess.run(['./Tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
             with open(self.im4g3, "rb") as f:
                 raw_data = f.read()
 
@@ -623,15 +674,52 @@ class MainWindow:
         fil30 = "temp_img.JPG"
         # Run JpegRepair
         if self.im4g3:
-            #                                                     file in        file out
-            if self.ins3rt_d3l3t3: pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-            else: pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+            if self.uic_edit_image.b0x_d3l3t3_2.isChecked():
+                mcux1, mcuy1 = [int(x.strip()) for x in self.uic_edit_image.le_mcu_xy_1.text().split(',')]
+                mcux2, mcuy2 = [int(x.strip()) for x in self.uic_edit_image.le_mcu_xy_2.text().split(',')]
 
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            subprocess.Popen(pr0c, startupinfo=startupinfo)   
+                print(f"Delete mcu {mcux1},{mcuy1} - {mcux2},{mcuy2}")
+                mcus = [f'{mcux1},{mcuy1}',f'{mcux2},{mcuy2}'] 
+                # Tim mcu va xoa doan do
+                matches = []
+                with open("log_mcu.txt", "r", encoding="utf-8") as f:
+                    for line in f:
+                        for num in mcus:
+                            if f"({num})" in line:
+                                matches.append(line.strip())
+
+                delete_mcu(self.im4g3, "temp_img_fixed.JPG", matches)
+                # time.sleep(3)
+
+                #                                                     file in        file out
+                if self.ins3rt_d3l3t3: pr0c = ["./Tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+                else: pr0c = ["./Tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.Popen(pr0c, startupinfo=startupinfo)   
+
+
+            else:
+                #                                                     file in        file out
+                if self.ins3rt_d3l3t3: pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+                else: pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+
+                startupinfo = subprocess.STARTUPINFO()
+                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+                subprocess.Popen(pr0c, startupinfo=startupinfo)   
+                
+            time.sleep(1)
+            with open("temp_img.JPG", "rb") as f:
+                raw_data = f.read()
+
+            img = Image.open(BytesIO(raw_data)).convert("RGB")
+            w, h = img.size
+            qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+            pixmap = QPixmap.fromImage(qimg)
+
             # View
-            self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), QPixmap(fil30))))
+            self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
 
 
 
