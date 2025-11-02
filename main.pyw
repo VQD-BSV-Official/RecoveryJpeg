@@ -9,7 +9,7 @@ from io import BytesIO
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QListView
+from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QListView, QAbstractItemView
 
 from Run.read_data import read_data
 from Run.view_mcu import MCUViewer
@@ -38,6 +38,17 @@ class MainWindow:
         self.uic.listWidget.setResizeMode(QListWidget.ResizeMode.Adjust)
         self.uic.listWidget.setMovement(QListView.Movement.Static)
         self.uic.listWidget.setSpacing(12)
+
+        # Bật nhận file thả
+        lw = self.uic.listWidget
+        lw.setAcceptDrops(True)
+        lw.setDropIndicatorShown(True)
+        lw.setDragDropMode(QListWidget.DragDropMode.DropOnly)
+
+        # Gắn hàm xử lý trực tiếp cho listWidget
+        lw.dragEnterEvent = self.dragEnterEvent
+        lw.dragMoveEvent = self.dragMoveEvent
+        lw.dropEvent = self.dropEvent
 
         # THAM SỐ: thay đổi nếu muốn thumbnail khác
         self.thumb_w = 89
@@ -88,6 +99,33 @@ class MainWindow:
         self.image = ""
         self.start = self.end = 0
 
+    def dragEnterEvent(self, event):
+        # Kiểm tra có file được kéo vào không
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        # Bắt buộc có hàm này trong Qt6 để giữ cho drop hợp lệ
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        for url in event.mimeData().urls():
+            self.image = url.toLocalFile()
+            # Reset list & label
+            self.uic.listWidget.clear()
+            self.uic.label.clear()
+
+            if self.image: self.uic.textEdit.append(f'📂: {self.image}')
+            else: self.uic.textEdit.append(f'''❌ Can't open file''')
+                
+            # View
+            self.main()
+        event.acceptProposedAction()
 
     def make_square_thumbnail(self, pixmap: QPixmap) -> QPixmap:
         """
@@ -144,12 +182,12 @@ class MainWindow:
             list_offset = read_data(self.image)
 
             if list_offset != []:
-                self.uic.textEdit.insertPlainText("..................Have")
+                self.uic.textEdit.insertPlainText("..................✅")
                 for offset in list_offset:
                     self.add_image(offset)
                     # self.uic.listWidget.addItem(offset)
 
-            else: self.uic.textEdit.insertPlainText("..................Nothing")
+            else: self.uic.textEdit.insertPlainText("..................❌")
 
 # ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
     # Delete file - N3T9_25
@@ -194,7 +232,7 @@ class MainWindow:
             return pixmap
 
         except Exception as e:
-            self.uic.textEdit.insertPlainText("...Faild")
+            self.uic.textEdit.insertPlainText("...❌ - ReadImage")
             # print(traceback.format_exc())  # In chi tiết lỗi
             # Hoặc đơn giản: print(f"Lỗi: {e}")
             return None  # hoặc QPixmap() để trả về pixmap rỗng
@@ -222,9 +260,8 @@ class MainWindow:
     def decode_image(self):
         if self.image:
             decode_jpeg(self.image, os.path.splitext(self.image)[0] + "_decode.jpg")
-            self.uic.textEdit.append("✅ Decode image")
-        else:
-            print("⚠️ Can't Decode")
+            self.uic.textEdit.append("✅ Decode")
+        else: self.uic.textEdit.append("❌ Can't decode")
 
 
 
@@ -232,7 +269,7 @@ class MainWindow:
     def save_file(self):
         self.save_image = QFileDialog.getSaveFileName(None, "Save File", None ,filter='JPEG files (*.JPG);; All files (*)')[0]
         if not (self.save_image and self.image and self.start):
-            self.uic.textEdit.append("⚠️ Can't save")
+            self.uic.textEdit.append("❌ Can't save")
             return
         
         header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
@@ -260,15 +297,14 @@ class MainWindow:
                 f.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
             self.uic.textEdit.append(f'''💾 Save File: {self.start:X}x{self.end:X} --> {self.save_image}''')
-        else:
-            self.uic.textEdit.append("⚠️ Can't save (marker not found)")
+        else: self.uic.textEdit.append("❌ Can't save (marker not found)")
 
 
     # Export Folder - N26T9_25 - OK have check error
     def export_folder(self):
         self.export_folder = QFileDialog.getExistingDirectory(None, "Select Folder")
         if not (self.export_folder and self.uic.listWidget.count()):
-            self.uic.textEdit.append("⚠️ Can't export folder")
+            self.uic.textEdit.append("❌ Can't export folder")
             return
 
         header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
@@ -303,15 +339,10 @@ class MainWindow:
         self.uic.textEdit.append(f"💾 Export Folder: {self.export_folder}")
 
 
-    # Open Folder - N26T9_25 - OK have check error
+    # Open Folder - N26T9_25 - OK - check error
     def open_folder(self):
         self.image = QFileDialog.getExistingDirectory(None, "Select Folder")
-        # Reset list & label
-        self.uic.listWidget.clear()
-        self.uic.label.clear()
-
-        if self.image != "":
-            self.uic.textEdit.append(f'📂 Open Folder: {self.image}')
+        if self.image:
             self.delete()
             # Read folder
             for i in os.listdir(self.image):
@@ -321,26 +352,27 @@ class MainWindow:
                             w.write(r.read())
 
             # View & log
-            self.uic.textEdit.append(f'📂 Open Folder: {self.image}')
+            self.uic.textEdit.append(f'📂 Folder: {self.image}')
             self.image = "temp_rp"
-        else:
-            self.uic.textEdit.append(f'''⚠️ Can't open folder''')
+        else: self.uic.textEdit.append(f'''❌ Can't open folder''')
 
-        self.main()
-
-
-    # Open File - N26T9_25 - OK have check error
-    def open_file(self):
-        self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;All files (*)')[0]
         # Reset list & label
         self.uic.listWidget.clear()
         self.uic.label.clear()
 
-        if self.image != "":
-            self.uic.textEdit.append(f'📂 Open File: {self.image}')
-        else:
-            self.uic.textEdit.append(f'''⚠️ Can't open file''')
-            
+        self.main()
+
+
+    # Open File - N26T9_25 - OK - check error
+    def open_file(self):
+        self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;All files (*)')[0]
+        if self.image: self.uic.textEdit.append(f'🗃 File: {self.image}')
+        else: self.uic.textEdit.append(f'''❌ Can't open file''')
+
+        # Reset list & label
+        self.uic.listWidget.clear()
+        self.uic.label.clear()
+
         # View
         self.main()
         
@@ -477,16 +509,37 @@ class MainWindow:
         self.Create_New.show()
 
         self.uic_Create_New.b_add.clicked.connect(self.add_create)
+        self.uic_Create_New.checkBox_2.stateChanged.connect(self.on_checkbox_changed)
 
         # OK & Exit
         self.uic_Create_New.b_OK.clicked.connect(self.Create_New_OK)
         self.uic_Create_New.b_Cancel.clicked.connect(lambda: self.Create_New.close())
 
+    def on_checkbox_changed(self, state):
+        # state = Qt.CheckState.Checked.value hoặc Unchecked.value
+        enabled = (state != Qt.CheckState.Checked.value)
+
+        # Vô hiệu hóa / kích hoạt các widget
+        for widget in [self.uic_Create_New.label_7, self.uic_Create_New.cbox_dqt]:
+            widget.setEnabled(enabled)
+
+        # Tùy chọn: đổi màu chữ hoặc nền để nổi bật hơn (không cần thiết vì Qt tự gray)
+        # Nhưng nếu muốn nhấn mạnh:
+        if not enabled:
+            self.Create_New.setStyleSheet("""
+                QComboBox:disabled, QPushButton:disabled, QLabel:disabled {
+                    color: gray;
+                }
+            """)
+        else:
+            self.Create_New.setStyleSheet("")  # Reset style
 
     def add_create(self):
         w, h = self.uic_Create_New.ledit_pixel_w.text(), self.uic_Create_New.ledit_pixel_h.text()
 
-        byte000x = self.uic_Create_New.cbox_dqt.currentText()
+        if self.uic_Create_New.checkBox_2.isChecked() == True:
+            byte000x = "90%"
+        else: byte000x = self.uic_Create_New.cbox_dqt.currentText()
         byte2x = self.uic_Create_New.cbox_fac.currentText()
 
         item = f"{byte000x} - {w} x {h} - {byte2x}"
@@ -502,7 +555,7 @@ class MainWindow:
         self.Create_New.close()
         
         selected_item = self.uic_Create_New.listWidget.currentItem()  # Lấy item được chọn
-        if selected_item.text() != "Auto":
+        if selected_item.text() != "Auto" and self.image:
             # text = selected_item.text()  # Lấy văn bản của item
             # print(f"Item được chọn: {text}")
             # Tách chuỗi dựa trên dấu " - " và " x "
@@ -588,6 +641,7 @@ class MainWindow:
         self.im4g3 = self.ins3rt_d3l3t3 = ""
 
         if self.image:
+            time.sleep(1)
             subprocess.run(['./Tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
 
             self.im4g3 = self.image
