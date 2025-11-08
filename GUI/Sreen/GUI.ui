@@ -40,6 +40,15 @@
           <pointsize>10</pointsize>
          </font>
         </property>
+        <property name="acceptDrops">
+         <bool>true</bool>
+        </property>
+        <property name="dragEnabled">
+         <bool>true</bool>
+        </property>
+        <property name="dragDropMode">
+         <enum>QAbstractItemView::NoDragDrop</enum>
+        </property>
         <property name="resizeMode">
          <enum>QListView::Fixed</enum>
         </property>
@@ -88,6 +97,12 @@
         <font>
          <pointsize>10</pointsize>
         </font>
+       </property>
+       <property name="readOnly">
+        <bool>true</bool>
+       </property>
+       <property name="textInteractionFlags">
+        <set>Qt::NoTextInteraction</set>
        </property>
       </widget>
      </widget>
@@ -166,11 +181,6 @@
     <string>Open</string>
    </property>
   </action>
-  <action name="actionSave_as">
-   <property name="text">
-    <string>Save as</string>
-   </property>
-  </action>
   <action name="Save">
    <property name="text">
     <string>Save As</string>
@@ -193,11 +203,6 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Alt+O</string>
-   </property>
-  </action>
-  <action name="actionNone">
-   <property name="text">
-    <string>None</string>
    </property>
   </action>
   <action name="None_Hex">
@@ -233,68 +238,16 @@
    </property>
   </action>
   <action name="About">
-   <property name="icon">
-    <iconset>
-     <normaloff>../Logo/logo.ico</normaloff>../Logo/logo.ico</iconset>
-   </property>
    <property name="text">
     <string>About</string>
    </property>
   </action>
-  <action name="actionCanon_RAW_CR2">
-   <property name="text">
-    <string>Canon RAW CR2</string>
-   </property>
-  </action>
-  <action name="actionSony_RAW_ARW">
-   <property name="text">
-    <string>Sony RAW ARW</string>
-   </property>
-  </action>
-  <action name="actionNikon_RAW_NEF">
-   <property name="text">
-    <string>Nikon RAW NEF</string>
-   </property>
-  </action>
-  <action name="RAW">
-   <property name="text">
-    <string>File RAW</string>
-   </property>
-   <property name="shortcut">
-    <string>Alt+R</string>
-   </property>
-  </action>
-  <action name="ARW">
-   <property name="text">
-    <string>Sony RAW ARW</string>
-   </property>
-  </action>
-  <action name="CR2">
-   <property name="text">
-    <string>Canon RAW CR2</string>
-   </property>
-  </action>
   <action name="Create_New">
    <property name="text">
-    <string>Create New </string>
+    <string>Create New</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="actionOpen_Disk">
-   <property name="text">
-    <string>Disk</string>
-   </property>
-  </action>
-  <action name="Restart_Software">
-   <property name="text">
-    <string>Restart Software</string>
-   </property>
-  </action>
-  <action name="actionHi">
-   <property name="text">
-    <string>Hi</string>
    </property>
   </action>
   <action name="Decode">
