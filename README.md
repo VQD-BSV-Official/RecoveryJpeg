@@ -6,25 +6,18 @@
 [![Python](https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![PyQt6](https://img.shields.io/badge/GUI-PyQt6-538CC9?style=for-the-badge&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/intro)
 
-## 🖼️ Recover Your Precious Photos  
-**3 ways to repair corrupted JPEG files**
+## 🖼️ Recover Your Photos
+3 ways to repair JPEG:
+- 🧩 Extract thumbnails  
+- 🛠️ Replace header (FF D8…FF DA)  
+- 🔗 Concatenate MCUs  
 
-- **🧩 Extract thumbnails** – lấy thumbnail còn nguyên trong file  
-- **🛠️ Replace header (FF D8 … FF DA)** – thay lại header JPEG chuẩn  
-- **🔗 Concatenate MCUs** – ghép lại các MCU theo đúng cấu trúc file  
+Sources:  
+[JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp) · [JpegDecomp](https://github.com/albmac/jpeg-decomp) · [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)
 
----
-
-## 📘 What I Learned  
-I learned image repair techniques in more depth from the following sources:
-
-- [JpegRepair](https://github.com/dmahurin/jpegrepair)  
-- [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp)  
-- [JpegDecomp](https://github.com/albmac/jpeg-decomp)  
-- [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)
 
 ## Usage
-![Thiết kế chưa có tên](https://github.com/VQD-BSV/FreeTool/assets/127699283/5ac152b6-e02e-4a8e-a11e-5746db106c81)
+?
 
 > [!Important]
 > <img src="https://github.com/user-attachments/assets/e44b917f-01d5-4df4-af07-17703e9b553f" alt="BIDV" width="200" style="max-width: 100%; margin: 0 auto;"> <br>
