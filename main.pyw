@@ -39,17 +39,6 @@ class MainWindow:
         self.uic.listWidget.setMovement(QListView.Movement.Static)
         self.uic.listWidget.setSpacing(12)
 
-        # Bật nhận file thả
-        lw = self.uic.listWidget
-        lw.setAcceptDrops(True)
-        lw.setDropIndicatorShown(True)
-        lw.setDragDropMode(QListWidget.DragDropMode.DropOnly)
-
-        # Gắn hàm xử lý trực tiếp cho listWidget
-        lw.dragEnterEvent = self.dragEnterEvent
-        lw.dragMoveEvent = self.dragMoveEvent
-        lw.dropEvent = self.dropEvent
-
         # THAM SỐ: thay đổi nếu muốn thumbnail khác
         self.thumb_w = 89
         self.thumb_h = 89
@@ -68,8 +57,7 @@ class MainWindow:
 
         # //////////////////////////////////////////
         # //////////////////////////////////////////
-        # self.uic.splitter.setStretchFactor(0 , 1) 
-        self.uic.splitter.setSizes([400, 100])
+        self.uic.splitter.setSizes([400, 125])
         self.uic.splitter_2.setSizes([220, 100])
 
         self.uic.Decode.triggered.connect(self.decode_image)
@@ -99,33 +87,6 @@ class MainWindow:
         self.image = ""
         self.start = self.end = 0
 
-    def dragEnterEvent(self, event):
-        # Kiểm tra có file được kéo vào không
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-        else:
-            event.ignore()
-
-    def dragMoveEvent(self, event):
-        # Bắt buộc có hàm này trong Qt6 để giữ cho drop hợp lệ
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-        else:
-            event.ignore()
-
-    def dropEvent(self, event):
-        for url in event.mimeData().urls():
-            self.image = url.toLocalFile()
-            # Reset list & label
-            self.uic.listWidget.clear()
-            self.uic.label.clear()
-
-            if self.image: self.uic.textEdit.append(f'📂: {self.image}')
-            else: self.uic.textEdit.append(f'''❌ Can't open file''')
-                
-            # View
-            self.main()
-        event.acceptProposedAction()
 
     def make_square_thumbnail(self, pixmap: QPixmap) -> QPixmap:
         """
@@ -151,30 +112,53 @@ class MainWindow:
         return base
 
 # ////////////////////////////////////////main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    # Tối ưu hàm add_image
+    # def add_image(self, item_off):
+    #     ioffset = item_off # .text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
+    #     self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
+
+    #     with open(self.image, "rb") as file:
+    #         file.seek(self.start) # Di chỏ đến offset
+    #         data = file.read(self.end - self.start)
+    #         # h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+
+    #         pixmap = self.read_image(data)
+
+    #         if pixmap:
+    #             w = pixmap.width(); h = pixmap.height()
+
+    #             thumb = self.make_square_thumbnail(pixmap)
+    #             item = QListWidgetItem(QIcon(thumb), f"{w}x{h}") # item_off)
+
+    #             # Ép size ô bằng grid_size để đồng nhất & căn chữ giữa
+    #             item.setSizeHint(self.grid_size)
+    #             item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter)
+
+    #             item.setToolTip(f"{item_off}")
+
+    #             self.uic.listWidget.addItem(item)
+
     def add_image(self, item_off):
-        ioffset = item_off # .text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
-        self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
-
-        with open(self.image, "rb") as file:
-            file.seek(self.start) # Di chỏ đến offset
-            data = file.read(self.end - self.start)
-            # h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-
-            pixmap = self.read_image(data)
-
-            if pixmap:
-                w = pixmap.width(); h = pixmap.height()
-
-                thumb = self.make_square_thumbnail(pixmap)
-                item = QListWidgetItem(QIcon(thumb), f"{w}x{h}") # item_off)
+        # Parse offset hex - Kiểu "0xSTARTxEND" từ hex -> offset
+        self.start, self.end = (int(x, 16) for x in item_off.split('x'))
+        
+        with open(self.image, "rb") as f:
+            f.seek(self.start) # Di chỏ đến offset
+            data = f.read(self.end - self.start)
+            
+            if pixmap := self.read_image(data):
+                # Create thumbnail and list item
+                thumb = self.make_square_thumbnail(pixmap) # Kích thước của ảnh
+                item = QListWidgetItem(QIcon(thumb), f"{pixmap.width()}x{pixmap.height()}")
 
                 # Ép size ô bằng grid_size để đồng nhất & căn chữ giữa
-                item.setSizeHint(self.grid_size)
+                item.setSizeHint(self.grid_size) 
                 item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter)
-
-                item.setToolTip(f"{item_off}")
-
+                item.setToolTip(item_off)
+                
                 self.uic.listWidget.addItem(item)
+
+
 
     # Find marker - N24T1_25
     def main(self):
