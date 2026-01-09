@@ -112,32 +112,7 @@ class MainWindow:
         return base
 
 # ////////////////////////////////////////main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # Tối ưu hàm add_image
-    # def add_image(self, item_off):
-    #     ioffset = item_off # .text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
-    #     self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
-
-    #     with open(self.image, "rb") as file:
-    #         file.seek(self.start) # Di chỏ đến offset
-    #         data = file.read(self.end - self.start)
-    #         # h34d3r = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-
-    #         pixmap = self.read_image(data)
-
-    #         if pixmap:
-    #             w = pixmap.width(); h = pixmap.height()
-
-    #             thumb = self.make_square_thumbnail(pixmap)
-    #             item = QListWidgetItem(QIcon(thumb), f"{w}x{h}") # item_off)
-
-    #             # Ép size ô bằng grid_size để đồng nhất & căn chữ giữa
-    #             item.setSizeHint(self.grid_size)
-    #             item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter)
-
-    #             item.setToolTip(f"{item_off}")
-
-    #             self.uic.listWidget.addItem(item)
-
+    # Toiuu
     def add_image(self, item_off):
         # Parse offset hex - Kiểu "0xSTARTxEND" từ hex -> offset
         self.start, self.end = (int(x, 16) for x in item_off.split('x'))
@@ -159,30 +134,27 @@ class MainWindow:
                 self.uic.listWidget.addItem(item)
 
 
-
-    # Find marker - N24T1_25
+    # Find marker - N24T1_25 - #2 Toiuu
     def main(self):
-        if self.image: # Đọc file và thêm vào list
-            list_offset = read_data(self.image)
+        if not self.image: return
 
-            if list_offset != []:
-                self.uic.textEdit.insertPlainText("..................✅")
-                for offset in list_offset:
-                    self.add_image(offset)
-                    # self.uic.listWidget.addItem(offset)
+        # Đọc file và thêm vào list
+        list_offset = read_data(self.image)
+        if list_offset:
+            self.uic.textEdit.insertPlainText("..................✅")
+            for offset in list_offset:
+                self.add_image(offset) # self.uic.listWidget.addItem(offset)
 
-            else: self.uic.textEdit.insertPlainText("..................❌")
+        else: self.uic.textEdit.insertPlainText("..................❌")
 
 # ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-    # Delete file - N3T9_25
-    def delete(self, count = None):
-        if count == 2:
-            for file in ["blank.jpg", "header_out"]:
-                if os.path.exists(file): os.remove(file)            
-
-        else:
-            for file in ["temp_rp", "temp_rp.raw"]:
-                if os.path.exists(file): os.remove(file)
+    # Delete file - N3T9_25 - #3 Toiuu
+    def delete(self, count=None):
+        files_delete = ["blank.jpg", "header_out"] if count == 2 else ["temp_rp", "temp_rp.raw"]
+        
+        for file in files_delete:
+            if os.path.exists(file):
+                os.remove(file)
 
 
     # View image (label) - N3T9_25
