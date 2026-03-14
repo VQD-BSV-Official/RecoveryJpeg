@@ -21,4 +21,6 @@ Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecover
 
 
 ## Usage
-?
+<a href="https://youtu.be/oKuoWYz6NP8">
+  <img src="https://img.youtube.com/vi/oKuoWYz6NP8/maxresdefault.jpg" width="600">
+</a>
