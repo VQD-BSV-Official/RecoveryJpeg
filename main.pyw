@@ -11,16 +11,16 @@ from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics
 from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QListView, QAbstractItemView
 
-from Run.read_data import read_data
-from Run.view_mcu import MCUViewer
-from Run.s0_decode import decode_jpeg
-from Run.s3_delete import delete_mcu
+from controllers.read_data import read_data
+from controllers.view_mcu import MCUViewer
+from controllers.s0_decode import decode_jpeg
+from controllers.s3_delete import delete_mcu
 
 
-from GUI.Sreen.GUI import Ui_MainWindow
-from GUI.Widget.About import Ui_About
-from GUI.Widget.Create import Ui_Create_New
-from GUI.Widget.Edit_Image import Ui_Edit_Image
+from views.Sreen.GUI import Ui_MainWindow
+from views.Widget.About import Ui_About
+from views.Widget.Create import Ui_Create_New
+from views.Widget.Edit_Image import Ui_Edit_Image
 
 class MainWindow:
     def __init__(self):
@@ -528,7 +528,7 @@ class MainWindow:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             # RUN
-            pr0c = subprocess.Popen(["./Tool/create_header.exe", byte000x, w, h, byte2x], startupinfo=startupinfo)
+            pr0c = subprocess.Popen(["./tool/create_header.exe", byte000x, w, h, byte2x], startupinfo=startupinfo)
             while pr0c.poll() is None:
                 QtWidgets.QApplication.processEvents()
             pr0c.wait()
@@ -568,7 +568,7 @@ class MainWindow:
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
             # RUN
-            pr0c = subprocess.Popen(["./Tool/JpegRecovery.exe","temp_rp"], startupinfo=startupinfo)
+            pr0c = subprocess.Popen(["./tool/JpegRecovery.exe","temp_rp"], startupinfo=startupinfo)
             while pr0c.poll() is None:
                 QtWidgets.QApplication.processEvents()
             pr0c.wait()
@@ -598,7 +598,7 @@ class MainWindow:
 
         if self.image:
             time.sleep(1)
-            subprocess.run(['./Tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
+            subprocess.run(['./tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
 
             self.im4g3 = self.image
             with open(self.image, 'rb') as r:
@@ -653,7 +653,7 @@ class MainWindow:
         
         # View
         if self.im4g3:
-            subprocess.run(['./Tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
+            subprocess.run(['./tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
             with open(self.im4g3, "rb") as f:
                 raw_data = f.read()
 
@@ -702,7 +702,7 @@ class MainWindow:
                 # time.sleep(3)
 
                 #                                                     file in        file out
-                if self.ins3rt_d3l3t3: pr0c = ["./Tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+                if self.ins3rt_d3l3t3: pr0c = ["./tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
                 else: pr0c = ["./Tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
 
                 startupinfo = subprocess.STARTUPINFO()
@@ -712,7 +712,7 @@ class MainWindow:
 
             else:
                 #                                                     file in        file out
-                if self.ins3rt_d3l3t3: pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+                if self.ins3rt_d3l3t3: pr0c = ["./tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
                 else: pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
 
                 startupinfo = subprocess.STARTUPINFO()
