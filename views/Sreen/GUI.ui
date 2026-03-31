@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>RecoveryJpeg v1.8.0</string>
+   <string>RecoveryJpeg v1.9.0</string>
   </property>
   <property name="windowIcon">
    <iconset>
@@ -253,6 +253,14 @@
   <action name="Decode">
    <property name="text">
     <string>Decode</string>
+   </property>
+  </action>
+  <action name="RAW">
+   <property name="text">
+    <string>Raw</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+R</string>
    </property>
   </action>
  </widget>

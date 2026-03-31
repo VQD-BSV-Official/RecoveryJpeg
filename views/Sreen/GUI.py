@@ -106,11 +106,13 @@ class Ui_MainWindow(object):
         self.Create_New.setObjectName("Create_New")
         self.Decode = QtGui.QAction(parent=MainWindow)
         self.Decode.setObjectName("Decode")
+        self.RAW = QtGui.QAction(parent=MainWindow)
+        self.RAW.setObjectName("RAW")
         self.menuOpen.addAction(self.Open_File)
         self.menuOpen.addAction(self.Open_Folder)
         self.menuUsing_Header.addAction(self.None_Hex)
         self.menuUsing_Header.addAction(self.x25805)
-        self.menuUsing_Header.addAction(MainWindow.RAW)
+        self.menuUsing_Header.addAction(self.RAW)
         self.menuFile.addAction(self.menuOpen.menuAction())
         self.menuFile.addAction(self.menuUsing_Header.menuAction())
         self.menuImage.addAction(self.Save)
@@ -130,7 +132,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "RecoveryJpeg v1.8.0"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "RecoveryJpeg v1.9.0"))
         self.label_Copyright.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-weight:700;\">Author &amp; Developed by: </span><a href=\"https://www.facebook.com/QuangDaiVQD\"><span style=\" font-weight:700; text-decoration: underline; color:#0000ff;\">Vũ Quang Đại</span></a><br/></p></body></html>"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuOpen.setTitle(_translate("MainWindow", "Open"))
@@ -156,3 +158,5 @@ class Ui_MainWindow(object):
         self.Create_New.setText(_translate("MainWindow", "Create New"))
         self.Create_New.setShortcut(_translate("MainWindow", "Ctrl+N"))
         self.Decode.setText(_translate("MainWindow", "Decode"))
+        self.RAW.setText(_translate("MainWindow", "Raw"))
+        self.RAW.setShortcut(_translate("MainWindow", "Alt+R"))
