@@ -1,27 +1,43 @@
-"""1. Thay header lớn hơn kích thước ảnh -> xám ở đáy -> bé hơn
-    2. Thay header bé hơn không -> xám ở đáy -> lớn hơn"""
+# /////////////////////////////////////////////
+# >>> SYSTEM ⚙️ ──────────────────────────────
 import sys, os, subprocess, binascii, shutil, time
-
-# Proce Image
-from PIL import Image, ImageFile
 from io import BytesIO
 
-from PyQt6 import QtWidgets
+# /////////////////////////////////////////////
+# >>> THIRD-PARTY 👾 ─────────────────────────
+from PIL import Image, ImageFile  # Image processing
+
 from PyQt6.QtCore import Qt, QSize
 from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics
-from PyQt6.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidget, QListWidgetItem, QListView, QAbstractItemView
+from PyQt6.QtWidgets import (
+    QApplication,
+    QMainWindow,
+    QFileDialog,
+    QListWidget,
+    QListWidgetItem,
+    QListView,
+    QAbstractItemView,
+)
 
+# /////////////////////////////////////////////
+# >>> CORE 🕵️ ───────────────────────────────
 from controllers.read_data import read_data
 from controllers.view_mcu import MCUViewer
 from controllers.s0_decode import decode_jpeg
 from controllers.s3_delete import delete_mcu
 
-
+# /////////////////////////////////////////////
+# >>> UI 💻 ──────────────────────────────────
 from views.Sreen.GUI import Ui_MainWindow
 from views.Widget.About import Ui_About
 from views.Widget.Create import Ui_Create_New
 from views.Widget.Edit_Image import Ui_Edit_Image
 
+
+
+
+# ══════════════════════════════════════════ 🧩 CLASS 🧩 ════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
 class MainWindow:
     def __init__(self):
         self.main_win = QMainWindow()
@@ -111,7 +127,8 @@ class MainWindow:
         
         return base
 
-# ////////////////////////////////////////main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ══════════════════════════════════════════ 🧠 MAIN 🧠 ═════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Toiuu
     def add_image(self, item_off):
         # Parse offset hex - Kiểu "0xSTARTxEND" từ hex -> offset
@@ -147,7 +164,10 @@ class MainWindow:
 
         else: self.uic.textEdit.insertPlainText("..................❌")
 
-# ////////////////////////////////////////Tool main\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+# ══════════════════════════════════════════ 🛰️ TOOLs 🛰️ ════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Delete file - N3T9_25 - #3 Toiuu
     def delete(self, count=None):
         files_delete = ["blank.jpg", "header_out"] if count == 2 else ["temp_rp", "temp_rp.raw"]
@@ -209,9 +229,8 @@ class MainWindow:
                 self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
                 self.uic.label.setScaledContents(False)
 
-
-# ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-# ////////////////////////////////////////----\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ══════════════════════════════════════════ 🛰️ TOOLs 🛰️ ════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Decode Image - N31T10_25 - OK have check error
     def decode_image(self):
         if self.image:
@@ -269,6 +288,7 @@ class MainWindow:
         with open(self.image, "rb") as f:
             for idx in range(self.uic.listWidget.count()):
                 start, end = map(lambda x: int(x, 16), self.uic.listWidget.item(idx).text().split("x"))
+                print(self.uic.listWidget.item(idx).text().split("x"))
                 f.seek(start)
                 cropped_data = f.read(end - start)
 
@@ -283,6 +303,7 @@ class MainWindow:
                     if pos != -1 and (min_offset is None or pos < min_offset):
                         min_offset = pos
                         fr0mh3x = v
+
                 # ////////////////////////////////////////
                 # ////////////////////////////////////////
                 if not fr0mh3x:
@@ -332,7 +353,8 @@ class MainWindow:
         # View
         self.main()
         
-# ////////////////////////////////////////Tool\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ══════════════════════════════════════════ 🛰️ TOOLs 🛰️ ════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Replace x25805 (ransomwawre) - N3T9_25
     def hex_x25805(self):
         self.image_hex = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
@@ -443,7 +465,10 @@ class MainWindow:
             self.image = 'temp_rp'
             self.main()
 
-# ////////////////////////////////////////About\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+
+# ══════════════════════════════════════════ 🔓 About 🔓 ════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
     # About - N16T10_24
     def show_About(self):
         self.about = QMainWindow()
@@ -454,8 +479,8 @@ class MainWindow:
         # Exit
         self.uic_about.b_OK.clicked.connect(lambda: self.about.close())
 
-# ////////////////////////////////////////Tool Create\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-# ////////////////////////////////////////Tool Create\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ════════════════════════════════════════ 💻 UI CREATE 💻 ══════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
 
     # Create New - N16T10_24
     def show_Create_New(self):
@@ -584,8 +609,8 @@ class MainWindow:
             else:
                 self.uic.textEdit.insertPlainText(f'👉 Processing failed')
 
-# ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-# ////////////////////////////////////////Tool Edit\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+# ═════════════════════════════════════════ 💻 UI EDIT 💻 ═══════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Edit Image - N26T10_25
     def show_Edit_Image(self):
         self.sr_edit_image = QMainWindow()
