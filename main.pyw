@@ -48,60 +48,73 @@ class MainWindow:
 
         # //////////////////////////////////////////
         # //////////////////////////////////////////
-        self.uic.listWidget.setViewMode(QListView.ViewMode.IconMode)
-        self.uic.listWidget.setFlow(QListView.Flow.LeftToRight)
-        self.uic.listWidget.setWrapping(True)
-        self.uic.listWidget.setResizeMode(QListWidget.ResizeMode.Adjust)
-        self.uic.listWidget.setMovement(QListView.Movement.Static)
-        self.uic.listWidget.setSpacing(12)
-
-        # THAM SỐ: thay đổi nếu muốn thumbnail khác
-        self.thumb_w = 89
-        self.thumb_h = 89
-        self.thumb_size = QSize(self.thumb_w, self.thumb_h)
-        self.uic.listWidget.setIconSize(self.thumb_size)
-
-        # Tính chiều cao cho text (dựa vào font hiện tại)
-        fm = QFontMetrics(self.uic.listWidget.font())
-        text_h = fm.height() + 4  # + padding nhỏ
-
-        # Grid size = thumbnail + khoảng cho text + padding
-        grid_w = self.thumb_w + 20
-        grid_h = self.thumb_h + text_h + 18
-        self.grid_size = QSize(grid_w, grid_h)
-        self.uic.listWidget.setGridSize(self.grid_size)
-
-        # //////////////////////////////////////////
-        # //////////////////////////////////////////
         self.uic.splitter.setSizes([400, 125])
         self.uic.splitter_2.setSizes([220, 100])
 
-        self.uic.Decode.triggered.connect(self.decode_image)
-
-        # Open File, Folder - N10T10_2024
-        self.uic.Open_File.triggered.connect(self.open_file)
-        self.uic.Open_Folder.triggered.connect(self.open_folder)
-
-        # Save File, Export Folder - N13T10_2024
-        self.uic.Save.triggered.connect(self.save_file)
-        self.uic.Export.triggered.connect(self.export_folder)
-
-        self.uic.None_Hex.triggered.connect(self.none_Hex)
-        self.uic.x25805.triggered.connect(self.hex_x25805)
-        self.uic.RAW.triggered.connect(self.RAW)
-
-        # Show Edit Image, About, Create New - N17T10_2024
-        self.uic.Edit_Image.triggered.connect(self.show_Edit_Image)
-        self.uic.About.triggered.connect(self.show_About)
-        self.uic.Create_New.triggered.connect(self.show_Create_New)
-
-        self.uic.listWidget.itemClicked.connect(self.item_clicked)
+        self._init_thumbnail()
+        self._init_signals()
 
         # self.uic.Open_File.setStatusTip("Open a file from your computer")
 
         # Value - N13T10_2024
         self.image = ""
         self.start = self.end = 0
+
+# ══════════════════════════════════════════ 🧩 INIT 🧩 ════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
+    def _init_thumbnail(self):
+        u = self.uic
+
+        u.listWidget.setViewMode(QListView.ViewMode.IconMode)
+        u.listWidget.setFlow(QListView.Flow.LeftToRight)
+        u.listWidget.setWrapping(True)
+        u.listWidget.setResizeMode(QListWidget.ResizeMode.Adjust)
+        u.listWidget.setMovement(QListView.Movement.Static)
+        u.listWidget.setSpacing(12)
+
+        # THAM SỐ: thay đổi nếu muốn thumbnail khác
+        self.thumb_w = 89
+        self.thumb_h = 89
+        self.thumb_size = QSize(self.thumb_w, self.thumb_h)
+        u.listWidget.setIconSize(self.thumb_size)
+
+        # Tính chiều cao cho text (dựa vào font hiện tại)
+        fm = QFontMetrics(u.listWidget.font())
+        text_h = fm.height() + 4  # + padding nhỏ
+
+        # Grid size = thumbnail + khoảng cho text + padding
+        grid_w = self.thumb_w + 20
+        grid_h = self.thumb_h + text_h + 18
+        self.grid_size = QSize(grid_w, grid_h)
+        u.listWidget.setGridSize(self.grid_size)
+
+
+    def _init_signals(self):
+        u = self.uic
+        
+        u.Decode.triggered.connect(self.decode_image)
+
+        # Open File, Folder - N3T4_26
+        u.Open_File.triggered.connect(self.open_file)
+        u.Open_Folder.triggered.connect(self.open_folder)
+
+        # Save File, Export Folder - N3T4_26
+        u.Save.triggered.connect(self.save_file)
+        u.Export.triggered.connect(self.export_folder)
+
+        u.None_Hex.triggered.connect(self.none_Hex)
+        u.x25805.triggered.connect(self.hex_x25805)
+        u.RAW.triggered.connect(self.RAW)
+
+        # Show Edit Image, About, Create New - N3T4_26
+        u.Edit_Image.triggered.connect(self.show_image_editor)
+        u.About.triggered.connect(self.show_About)
+        u.Create_New.triggered.connect(self.show_Create_New)
+
+        u.listWidget.itemClicked.connect(self.item_clicked)
+
+
+
 
 
     def make_square_thumbnail(self, pixmap: QPixmap) -> QPixmap:
@@ -612,7 +625,7 @@ class MainWindow:
 # ═════════════════════════════════════════ 💻 UI EDIT 💻 ═══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Edit Image - N26T10_25
-    def show_Edit_Image(self):
+    def show_image_editor(self):
         self.sr_edit_image = QMainWindow()
         self.uic_edit_image = Ui_Edit_Image()
         self.uic_edit_image.setupUi(self.sr_edit_image)
