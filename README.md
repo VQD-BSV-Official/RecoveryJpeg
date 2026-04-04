@@ -12,7 +12,7 @@
 
 
 ## 🖼️ Recover Your Photos
-3 ways to repair JPEG:
+3 ways to repair JPEG::
 - 🧩 Extract thumbnails  
 - 🛠️ Replace header (FF D8…FF DA)  
 - 🔗 Concatenate MCUs
