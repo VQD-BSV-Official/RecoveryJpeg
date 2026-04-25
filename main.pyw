@@ -8,7 +8,7 @@ from io import BytesIO
 from PIL import Image, ImageFile  # Image processing
 
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics
+from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics, QPalette, QColor
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -56,11 +56,12 @@ class MainWindow:
 
         # self.uic.Open_File.setStatusTip("Open a file from your computer")
 
-        # Value - N13T10_2024
+        # Value - N3T4_26
         self.image = ""
         self.start = self.end = 0
 
-# ══════════════════════════════════════════ 🧩 INIT 🧩 ════════════════════════════════════════════
+
+# ════════════════════════════════════════ 🧩 INIT CLASS🧩 ══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
     def _init_thumbnail(self):
         u = self.uic
@@ -112,9 +113,6 @@ class MainWindow:
         u.Create_New.triggered.connect(self.show_Create_New)
 
         u.listWidget.itemClicked.connect(self.item_clicked)
-
-
-
 
 
     def make_square_thumbnail(self, pixmap: QPixmap) -> QPixmap:
@@ -776,6 +774,24 @@ class MainWindow:
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setStyle("windowsvista")
+
+    # 2. Ép Light theme
+    # palette = QPalette()
+
+    # palette.setColor(QPalette.ColorRole.Window, QColor(255, 255, 255))
+    # palette.setColor(QPalette.ColorRole.WindowText, QColor(0, 0, 0))
+
+    # palette.setColor(QPalette.ColorRole.Base, QColor(255, 255, 255))
+    # palette.setColor(QPalette.ColorRole.Text, QColor(0, 0, 0))
+
+    # palette.setColor(QPalette.ColorRole.Button, QColor(240, 240, 240))
+    # palette.setColor(QPalette.ColorRole.ButtonText, QColor(0, 0, 0))
+
+    # app.setPalette(palette)
+
+    # app.setPalette(palette)
+
     main_win = MainWindow()
     main_win.show()
     sys.exit(app.exec())
