@@ -226,8 +226,8 @@ class MainWindow:
 
     # Click Item & View - N24T1_25
     def item_clicked(self, item):
-        ioffset = item.toolTip() # item.text() # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
-        self.start, self.end = map(lambda x: int(x, 16), ioffset.split('x'))
+        # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
+        self.start, self.end = map(lambda x: int(x, 16), self.uic.listWidget.item(idx).toolTip().split("x"))
 
         with open(self.image, "rb") as file:
             file.seek(self.start) # Di chỏ đến offset
@@ -298,8 +298,9 @@ class MainWindow:
 
         with open(self.image, "rb") as f:
             for idx in range(self.uic.listWidget.count()):
-                start, end = map(lambda x: int(x, 16), self.uic.listWidget.item(idx).text().split("x"))
+                start, end = map(lambda x: int(x, 16), self.uic.listWidget.item(idx).toolTip().split("x"))
                 print(self.uic.listWidget.item(idx).text().split("x"))
+                
                 f.seek(start)
                 cropped_data = f.read(end - start)
 
@@ -320,7 +321,7 @@ class MainWindow:
                 if not fr0mh3x:
                     continue  # bỏ qua nếu không tìm thấy marker
 
-                out_path = f"{self.export_folder}/OIMG_{idx+1}.JPG"
+                out_path = f"{self.export_folder}/IMG_{idx+1}.JPG"
                 with open(out_path, "wb") as out:
                     out.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
@@ -775,22 +776,6 @@ class MainWindow:
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     app.setStyle("windowsvista")
-
-    # 2. Ép Light theme
-    # palette = QPalette()
-
-    # palette.setColor(QPalette.ColorRole.Window, QColor(255, 255, 255))
-    # palette.setColor(QPalette.ColorRole.WindowText, QColor(0, 0, 0))
-
-    # palette.setColor(QPalette.ColorRole.Base, QColor(255, 255, 255))
-    # palette.setColor(QPalette.ColorRole.Text, QColor(0, 0, 0))
-
-    # palette.setColor(QPalette.ColorRole.Button, QColor(240, 240, 240))
-    # palette.setColor(QPalette.ColorRole.ButtonText, QColor(0, 0, 0))
-
-    # app.setPalette(palette)
-
-    # app.setPalette(palette)
 
     main_win = MainWindow()
     main_win.show()
