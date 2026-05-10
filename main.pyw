@@ -44,6 +44,10 @@ class MainWindow:
         self.uic = Ui_MainWindow()
         self.uic.setupUi(self.main_win)
 
+
+        self.JPEG_HEADER = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
+        self.MARKER_SOI  = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043", }
+
         ImageFile.LOAD_TRUNCATED_IMAGES = True
 
         # //////////////////////////////////////////
@@ -109,7 +113,7 @@ class MainWindow:
 
         # Show Edit Image, About, Create New - N3T4_26
         u.Edit_Image.triggered.connect(self.show_image_editor)
-        u.About.triggered.connect(self.show_About)
+        u.About.triggered.connect(self.show_about)
         u.Create_New.triggered.connect(self.show_Create_New)
 
         u.listWidget.itemClicked.connect(self.item_clicked)
@@ -138,9 +142,7 @@ class MainWindow:
         
         return base
 
-# ══════════════════════════════════════════ 🧠 MAIN 🧠 ═════════════════════════════════════════════
-# ════════════════════════════════════════════════════════════════════════════════════════════════════
-    # Toiuu
+
     def add_image(self, item_off):
         # Parse offset hex - Kiểu "0xSTARTxEND" từ hex -> offset
         self.start, self.end = (int(x, 16) for x in item_off.split('x'))
@@ -161,8 +163,9 @@ class MainWindow:
                 
                 self.uic.listWidget.addItem(item)
 
-
-    # Find marker - N24T1_25 - #2 Toiuu
+# ══════════════════════════════════════════ 🧠 MAIN 🧠 ═════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
+    # Find marker - N24T1_25
     def main(self):
         if not self.image: return
 
@@ -179,7 +182,7 @@ class MainWindow:
 
 # ══════════════════════════════════════════ 🛰️ TOOLs 🛰️ ════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
-    # Delete file - N3T9_25 - #3 Toiuu
+    # Delete file - N3T9_25
     def delete(self, count=None):
         files_delete = ["blank.jpg", "header_out"] if count == 2 else ["temp_rp", "temp_rp.raw"]
         
@@ -227,7 +230,8 @@ class MainWindow:
     # Click Item & View - N24T1_25
     def item_clicked(self, item):
         # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
-        self.start, self.end = map(lambda x: int(x, 16), self.uic.listWidget.item(idx).toolTip().split("x"))
+        self.start, self.end = map(lambda x: int(x, 16), item.toolTip().split('x'))
+        
 
         with open(self.image, "rb") as file:
             file.seek(self.start) # Di chỏ đến offset
@@ -250,6 +254,17 @@ class MainWindow:
         else: self.uic.textEdit.append("❌ Can't decode")
 
 
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
+    def _find_earliest_marker(self, data: bytes, markers: dict) -> str | None:
+        min_offset, result = None, None
+        for k, v in markers.items():
+            pos = data.find(k)
+            if pos != -1 and (min_offset is None or pos < min_offset):
+                min_offset, result = pos, v
+
+        return result
+
 
     # Save File - N26T9_25 - OK have check error
     def save_file(self):
@@ -258,29 +273,18 @@ class MainWindow:
             self.uic.textEdit.append("❌ Can't save")
             return
         
-        header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043", b"\xFF\xC4": "FFC4"}
+    
 
         with open(self.image, "rb") as file:
             file.seek(self.start) # Di chỏ đến offset
             cropped_data = file.read(self.end - self.start)
 
         # ////////////////////////////////////////
-        # fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
         # Tìm marker có offset nhỏ nhất
-        min_offset = None
-        fr0mh3x = None
-
-        for k, v in markers.items():
-            pos = cropped_data.find(k)
-            if pos != -1 and (min_offset is None or pos < min_offset):
-                min_offset = pos
-                fr0mh3x = v
-        # ////////////////////////////////////////
-        # ////////////////////////////////////////
+        fr0mh3x = self._find_earliest_marker(cropped_data, self.MARKER_SOI)
         if fr0mh3x:
             with open(self.save_image, 'wb') as f:
-                f.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
+                f.write(self.JPEG_HEADER + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
             self.uic.textEdit.append(f'''💾 Save File: {self.start:X}x{self.end:X} --> {self.save_image}''')
         else: self.uic.textEdit.append("❌ Can't save (marker not found)")
@@ -288,13 +292,11 @@ class MainWindow:
 
     # Export Folder - N26T9_25 - OK have check error
     def export_folder(self):
-        self.export_folder = QFileDialog.getExistingDirectory(None, "Select Folder")
-        if not (self.export_folder and self.uic.listWidget.count()):
+        self.export_path = QFileDialog.getExistingDirectory(None, "Select Folder")
+        if not (self.export_path and self.uic.listWidget.count()):
             self.uic.textEdit.append("❌ Can't export folder")
             return
-
-        header = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-        markers = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043", }
+        
 
         with open(self.image, "rb") as f:
             for idx in range(self.uic.listWidget.count()):
@@ -305,29 +307,19 @@ class MainWindow:
                 cropped_data = f.read(end - start)
 
                 # ////////////////////////////////////////
-                # fr0mh3x = next((v for k, v in markers.items() if k in cropped_data), None)
                 # Tìm marker có offset nhỏ nhất
-                min_offset = None
-                fr0mh3x = None
-
-                for k, v in markers.items():
-                    pos = cropped_data.find(k)
-                    if pos != -1 and (min_offset is None or pos < min_offset):
-                        min_offset = pos
-                        fr0mh3x = v
-
-                # ////////////////////////////////////////
-                # ////////////////////////////////////////
+                fr0mh3x = self._find_earliest_marker(cropped_data, self.MARKER_SOI)
                 if not fr0mh3x:
                     continue  # bỏ qua nếu không tìm thấy marker
 
-                out_path = f"{self.export_folder}/IMG_{idx+1}.JPG"
+                out_path = f"{self.export_path}/IMG_{idx+1}.JPG"
                 with open(out_path, "wb") as out:
-                    out.write(header + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
+                    out.write(self.JPEG_HEADER + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
-        self.uic.textEdit.append(f"💾 Export Folder: {self.export_folder}")
+        self.uic.textEdit.append(f"💾 Export Folder: {self.export_path}")
 
-
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
+# ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Open Folder - N26T9_25 - OK - check error
     def open_folder(self):
         self.image = QFileDialog.getExistingDirectory(None, "Select Folder")
@@ -481,15 +473,19 @@ class MainWindow:
 
 # ══════════════════════════════════════════ 🔓 About 🔓 ════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
-    # About - N16T10_24
-    def show_About(self):
-        self.about = QMainWindow()
-        self.uic_about = Ui_About()
-        self.uic_about.setupUi(self.about)
-        self.about.show()
+    # About - D10M05Y26
+    def show_about(self):
+        if not hasattr(self, "about"):
+            self.about = QMainWindow()
 
-        # Exit
-        self.uic_about.b_OK.clicked.connect(lambda: self.about.close())
+            self.uic_about = Ui_About()
+            self.uic_about.setupUi(self.about)
+
+            self.uic_about.b_OK.clicked.connect(self.about.close)
+
+        self.about.show()
+        self.about.raise_()
+        self.about.activateWindow()
 
 # ════════════════════════════════════════ 💻 UI CREATE 💻 ══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -623,7 +619,7 @@ class MainWindow:
 
 # ═════════════════════════════════════════ 💻 UI EDIT 💻 ═══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
-    # Edit Image - N26T10_25
+    # Edit Image - D10M05Y26
     def show_image_editor(self):
         self.sr_edit_image = QMainWindow()
         self.uic_edit_image = Ui_Edit_Image()
@@ -651,9 +647,9 @@ class MainWindow:
             self.uic_edit_image.sbox_pixel_h.setValue(pix.height())
             self.uic_edit_image.sbox_pixel_w.setValue(pix.width())
 
-        self.uic_edit_image.b_Open.clicked.connect(self.EI_Open)
-        self.uic_edit_image.b_Save.clicked.connect(self.EI_Save)
-        self.uic_edit_image.b_View.clicked.connect(self.EI_View)
+        self.uic_edit_image.b_Open.clicked.connect(self.EI_open)
+        self.uic_edit_image.b_Save.clicked.connect(self.EI_save)
+        self.uic_edit_image.b_View.clicked.connect(self.EI_view)
 
         self.uic_edit_image.b_pos.clicked.connect(lambda: self.EI_view_mcu())
 
@@ -665,13 +661,13 @@ class MainWindow:
         self.uic_edit_image.slider_cb.valueChanged.connect(lambda link: self.uic_edit_image.l_cb.setText(f"Cb = {self.uic_edit_image.slider_cb.value()}"))
         self.uic_edit_image.slider_y.valueChanged.connect(lambda link: self.uic_edit_image.l_y.setText(f"Y = {self.uic_edit_image.slider_y.value()}"))
 
-    # Save - N26T9_25
-    def EI_Save(self):
+    # Save - D10M05Y26
+    def EI_save(self):
         # Replace - Cho phép di chuyển khi các phân vùng
         save_file = QFileDialog.getSaveFileName(None, "Save File", "" ,filter='JPEG files (*.JPG);; All files (*)')[0]
         if save_file and os.path.exists("temp_img.JPG"): shutil.copy("temp_img.JPG", save_file)
 
-    # Check box - N26T9_25
+    # Check box - D10M05Y26
     def EI_checkbox(self):
         if self.uic_edit_image.b0x_ins3rt.isChecked():
             self.ins3rt_d3l3t3 = "insert"
@@ -680,8 +676,8 @@ class MainWindow:
             self.ins3rt_d3l3t3 = "delete"
             self.uic_edit_image.b0x_ins3rt.setChecked(False)
 
-    # Open File - N26T9_25
-    def EI_Open(self):
+    # Open File - D10M05Y26
+    def EI_open(self):
         self.im4g3 = QFileDialog.getOpenFileName(None, "Select File" , filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
         # Delete File & clear
         if os.path.exists("temp_img.JPG"): os.remove("temp_img.JPG")
@@ -707,8 +703,8 @@ class MainWindow:
         self.mcu_viewer = MCUViewer()
         self.mcu_viewer.show()
         
-    # View - N26T10_25
-    def EI_View(self):
+    # View - D10M05Y26
+    def EI_view(self):
         # Quy đổi giá trị & gán vào biến
         # Ex:       mcu_x = str(self.uic_edit_image.sbox_mcu_x.value())
         ui = self.uic_edit_image # Code rút gọn
