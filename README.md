@@ -16,13 +16,11 @@ Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecover
 - 🧩 Extract thumbnails (We will find the bytes from FFDB to FFD9, which are the thumbnails. We will extract them.)
 - 🛠️ Replace header (Replace the first byte of FF D8 with FF DA of the other file.)  
 - 🔗 Concatenate MCUs (Advanced MCU editing)
-
+- 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, but most ransomware with 4 characters at the end uses this encoding.
 
 
 <img width="636" height="549" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
 
-
-- 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, but most ransomware with 4 characters at the end uses this encoding.
 
 | Chroma Subsampling | MCU Size | Typical Cameras |
 |---|---|---|
