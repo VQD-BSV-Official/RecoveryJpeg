@@ -17,8 +17,19 @@ Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecover
 - 🛠️ Replace header (Replace the first byte of FF D8 with FF DA of the other file.)  
 - 🔗 Concatenate MCUs (Advanced MCU editing)
 
-<img width="836" height="749" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
 
+
+<img width="636" height="549" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
+
+
+- 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, <br>
+but most ransomware with 4 characters at the end uses this encoding.
+
+| Chroma Subsampling | MCU Size | Typical Cameras |
+|---|---|---|
+| **4:4:4** | 8 | Higher-end compacts, some DSLRs |
+| **4:2:2** | 16 | Canon DSLRs (default JPEG) |
+| **4:2:0** | 16 | Most phones, consumer cameras |
 
 
 ## Usage - 🎬 Demo Video
