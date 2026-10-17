@@ -7,8 +7,8 @@
 
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![PyQt6](https://img.shields.io/badge/GUI-PyQt6-538CC9?style=for-the-badge&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/intro)
-
+[![PyQt6](https://img.shields.io/badge/GUI-PyQt6-538CC9?style=for-the-badge&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/intro) <br>
+Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp) · [JpegDecomp](https://github.com/albmac/jpeg-decomp) · [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)
 
 
 ## 🖼️ Recover Your Photos
@@ -17,7 +17,7 @@
 - 🛠️ Replace header (FF D8…FF DA)  
 - 🔗 Concatenate MCUs
 
-Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp) · [JpegDecomp](https://github.com/albmac/jpeg-decomp) · [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)
+
 
 
 ## Usage - 🎬 Demo Video
