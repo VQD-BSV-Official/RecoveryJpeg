@@ -17,7 +17,7 @@ Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecover
 - 🛠️ Replace header (Replace the first byte of FF D8 with FF DA of the other file.)  
 - 🔗 Concatenate MCUs (Advanced MCU editing)
 
-<img width="936" height="849" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
+<img width="836" height="749" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
 
 
 
