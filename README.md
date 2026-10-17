@@ -8,15 +8,16 @@
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![PyQt6](https://img.shields.io/badge/GUI-PyQt6-538CC9?style=for-the-badge&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/intro) <br>
-Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp) · [JpegDecomp](https://github.com/albmac/jpeg-decomp) · [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/)
+Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp) · [JpegDecomp](https://github.com/albmac/jpeg-decomp) · [JPEG-Repair Toolkit](https://www.disktuna.com/jpgrepair-fix-and-repair-corrupt-jpeg-headers-and-invalid-markers/) · [Wikipedia](https://en.wikipedia.org/wiki/JPEG)
 
 
 ## 🖼️ Recover Your Photos
-3 ways to repair JPEG::
-- 🧩 Extract thumbnails  
-- 🛠️ Replace header (FF D8…FF DA)  
-- 🔗 Concatenate MCUs
+3 ways to repair JPEG:
+- 🧩 Extract thumbnails (We will find the bytes from FFDB to FFD9, which are the thumbnails. We will extract them.)
+- 🛠️ Replace header (Replace the first byte of FF D8 with FF DA of the other file.)  
+- 🔗 Concatenate MCUs (Advanced MCU editing)
 
+<img width="936" height="849" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
 
 
 
