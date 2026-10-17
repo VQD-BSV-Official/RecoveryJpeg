@@ -21,6 +21,7 @@ Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecover
 
 
 ## Usage - 🎬 Demo Video
+- **You can run the code directly using Python to update to the latest versions instead of waiting for the .exe release. Install any missing libraries, and if you encounter errors, please fix them and contribute your suggestions.**
 <a href="https://youtu.be/oKuoWYz6NP8">
   <img src="https://img.youtube.com/vi/oKuoWYz6NP8/maxresdefault.jpg" width="600">
 </a>
