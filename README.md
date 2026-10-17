@@ -22,8 +22,7 @@ Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecover
 <img width="636" height="549" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
 
 
-- 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, <br>
-but most ransomware with 4 characters at the end uses this encoding.
+- 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, but most ransomware with 4 characters at the end uses this encoding.
 
 | Chroma Subsampling | MCU Size | Typical Cameras |
 |---|---|---|
