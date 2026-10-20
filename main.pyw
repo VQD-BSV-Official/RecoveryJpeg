@@ -193,38 +193,28 @@ class MainWindow:
 
 
     def read_image(self, data):
-        try:
-            # Code beta
-            raw_data = b"\xFF\xD8" + data
-            img = Image.open(BytesIO(raw_data)).convert("RGB")
-            w, h = img.size
-            qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
-            pixmap = QPixmap.fromImage(qimg)
-
-            return pixmap
-
-        except Exception as e:
+        pixmap = QPixmap()
+        if not pixmap.loadFromData(b"\xFF\xD8" + data, "JPEG"):
             self.uic.textEdit.insertPlainText("...❌ - ReadImage")
-            # print(traceback.format_exc())  # In chi tiết lỗi
-            # Hoặc đơn giản: print(f"Lỗi: {e}")
-            return None  # hoặc QPixmap() để trả về pixmap rỗng
+            return None
+        return pixmap
+
+
+
 
     # Click Item & View - N24T1_25
     def item_clicked(self, item):
-        # Chuỗi kiểu "0xSTARTxEND" # Chuyển đổi hex -> offset
-        self.start, self.end = map(lambda x: int(x, 16), item.toolTip().split('x'))
-        
+        self.start, self.end = (int(x, 16) for x in item.toolTip().split('x'))
 
-        with open(self.image, "rb") as file:
-            file.seek(self.start) # Di chỏ đến offset
-            data = file.read(self.end - self.start)
+        with open(self.image, "rb") as f:
+            f.seek(self.start)
+            pixmap = self.read_image(f.read(self.end - self.start))
 
-            pixmap = self.read_image(data)
-            if pixmap:
-                self.uic.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic.label.width(), self.uic.label.height(), pixmap)))
-
-                self.uic.label.setFixedSize(self.uic.label.width(), self.uic.label.height())
-                self.uic.label.setScaledContents(False)
+        if pixmap:
+            label = self.uic.label
+            label.setPixmap(QPixmap.fromImage(self.view_label(label.width(), label.height(), pixmap)))
+            label.setFixedSize(label.size())
+            label.setScaledContents(False)
 
 # ══════════════════════════════════════════ 🛰️ TOOLs 🛰️ ════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -465,7 +455,6 @@ class MainWindow:
 
 # ════════════════════════════════════════ 💻 UI CREATE 💻 ══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
-
     # Create New - N16T10_24
     def show_Create_New(self):
         self.Create_New = QMainWindow()
@@ -473,123 +462,45 @@ class MainWindow:
         self.uic_Create_New.setupUi(self.Create_New)
         self.Create_New.show()
 
-        self.uic_Create_New.b_add.clicked.connect(self.add_create)
-        self.uic_Create_New.checkBox_2.stateChanged.connect(self.on_checkbox_changed)
+        # self.uic_Create_New.b_add.clicked.connect(self.add_create)
+        # self.uic_Create_New.checkBox_2.stateChanged.connect(self.on_checkbox_changed)
 
         # OK & Exit
         self.uic_Create_New.b_OK.clicked.connect(self.Create_New_OK)
         self.uic_Create_New.b_Cancel.clicked.connect(lambda: self.Create_New.close())
 
-    def on_checkbox_changed(self, state):
-        # state = Qt.CheckState.Checked.value hoặc Unchecked.value
-        enabled = (state != Qt.CheckState.Checked.value)
 
-        # Vô hiệu hóa / kích hoạt các widget
-        for widget in [self.uic_Create_New.label_7, self.uic_Create_New.cbox_dqt]:
-            widget.setEnabled(enabled)
 
-        # Tùy chọn: đổi màu chữ hoặc nền để nổi bật hơn (không cần thiết vì Qt tự gray)
-        # Nhưng nếu muốn nhấn mạnh:
-        if not enabled:
-            self.Create_New.setStyleSheet("""
-                QComboBox:disabled, QPushButton:disabled, QLabel:disabled {
-                    color: gray;
-                }
-            """)
-        else:
-            self.Create_New.setStyleSheet("")  # Reset style
-
-    def add_create(self):
-        w, h = self.uic_Create_New.ledit_pixel_w.text(), self.uic_Create_New.ledit_pixel_h.text()
-
-        if self.uic_Create_New.checkBox_2.isChecked() == True:
-            byte000x = "90%"
-        else: byte000x = self.uic_Create_New.cbox_dqt.currentText()
-        byte2x = self.uic_Create_New.cbox_fac.currentText()
-
-        item = f"{byte000x} - {w} x {h} - {byte2x}"
-
-        # Nếu có rồi bỏ qua
-        if self.uic_Create_New.listWidget.findItems(item, Qt.MatchFlag.MatchExactly): pass
-        else: self.uic_Create_New.listWidget.addItem(item)
 
     # OK (main) - N10T5_25
     def Create_New_OK(self):
         # Exit & delete file
         self.Create_New.close()
-        
         selected_item = self.uic_Create_New.listWidget.currentItem()  # Lấy item được chọn
-        if selected_item.text() != "Auto" and self.image:
-            # text = selected_item.text()  # Lấy văn bản của item
-            # print(f"Item được chọn: {text}")
-            # Tách chuỗi dựa trên dấu " - " và " x "
-            text = selected_item.text()
-            text = text.split("|")[0].strip()
-            parts = text.replace(" x ", " - ").split(" - ")
 
-            # Gán giá trị cho các biến
-            byte000x = parts[0].strip()  # "0001" or 0002
-            w, h = parts[1].strip(), parts[2].strip() # 6000x4000
-            byte2x = parts[3].strip()    # 21 or 22, 11, 41
 
+        if selected_item.text() == "Auto" and self.image:
+            offset = 153605 if self.uic_Create_New.checkBox.isChecked() else 0
+            # Chỉ đọc từ offset, không nạp cả file vào RAM rồi mới cắt
+            with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
+                f1.seek(offset)
+                shutil.copyfileobj(f1, f2)
+
+            self.uic.textEdit.append('🔍 Please wait for image processing')
 
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            # RUN
-            pr0c = subprocess.Popen(["./tool/create_header.exe", byte000x, w, h, byte2x], startupinfo=startupinfo)
-            while pr0c.poll() is None:
+            proc = subprocess.Popen(["./tool/JpegRecovery.exe", "temp_rp"], startupinfo=startupinfo)
+            while proc.poll() is None:
                 QtWidgets.QApplication.processEvents()
-            pr0c.wait()
-
-
-            with open(f'header_out', 'rb') as r:
-                data_header = r.read()
-
-            if self.uic_Create_New.checkBox.isChecked() == True:
-                # Read file & Write from x25805
-                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
-                    f2.write(data_header + f1.read()[153605:None])
-
-            else:
-                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
-                    f2.write(data_header + f1.read())
-
-
-            self.image = "temp_rp"
-            # print("Chay file main")
-            self.main()
-
-
-
-        # Using JpegRecovery
-        else:
-            # Read file & Write from x25805
-            if self.uic_Create_New.checkBox.isChecked() == True:
-                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
-                    f2.write(f1.read()[153605:None])
-            else:
-                with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
-                    f2.write(f1.read())                
-
-            self.uic.textEdit.append(f'🔍 Please wait for image processing')
-
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            # RUN
-            pr0c = subprocess.Popen(["./tool/JpegRecovery.exe","temp_rp"], startupinfo=startupinfo)
-            while pr0c.poll() is None:
-                QtWidgets.QApplication.processEvents()
-            pr0c.wait()
 
             if os.path.exists("temp_rp.jpg"):
-                # Rename & delete
-                os.rename("temp_rp.jpg", "temp_rp")
-
-                self.uic.textEdit.insertPlainText(f'👉 Successful processing')
+                os.replace("temp_rp.jpg", "temp_rp")
+                self.uic.textEdit.insertPlainText('👉 Successful processing')
                 self.image = "temp_rp"
                 self.main()
             else:
-                self.uic.textEdit.insertPlainText(f'👉 Processing failed')
+                self.uic.textEdit.insertPlainText('👉 Processing failed')
 
 # ═════════════════════════════════════════ 💻 UI EDIT 💻 ═══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -682,13 +593,9 @@ class MainWindow:
 
 
 
-
     def EI_view_mcu(self):
         self.mcu_viewer = MCUViewer()
         self.mcu_viewer.show()
-
-
-
 
 
         
@@ -752,9 +659,6 @@ class MainWindow:
 
             # View
             self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
-
-
-
 
 
 
