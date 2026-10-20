@@ -57,14 +57,10 @@ class MainWindow:
 
         self._init_thumbnail()
         self._init_signals()
-
-        # self.uic.Open_File.setStatusTip("Open a file from your computer")
-
+        
         # Value - N3T4_26
         self.image = ""
         self.start = self.end = 0
-
-
 # ════════════════════════════════════════ 🧩 INIT CLASS🧩 ══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
     def _init_thumbnail(self):
@@ -169,28 +165,14 @@ class MainWindow:
     def main(self):
         if not self.image: return
 
-        # Đọc file và thêm vào list
-        list_offset = read_data(self.image)
-        if list_offset:
-            self.uic.textEdit.insertPlainText("..................✅")
-            for offset in list_offset:
-                self.add_image(offset) # self.uic.listWidget.addItem(offset)
-
-        else: self.uic.textEdit.insertPlainText("..................❌")
-
-
+        offsets = read_data(self.image)
+        self.uic.textEdit.insertPlainText("..................✅" if offsets else "..................❌")
+        for offset in offsets:
+            self.add_image(offset)
+            
 
 # ══════════════════════════════════════════ 🛰️ TOOLs 🛰️ ════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
-    # Delete file - N3T9_25
-    def delete(self, count=None):
-        files_delete = ["blank.jpg", "header_out"] if count == 2 else ["temp_rp", "temp_rp.raw"]
-        
-        for file in files_delete:
-            if os.path.exists(file):
-                os.remove(file)
-
-
     # View image (label) - N3T9_25
     def view_label(self, label_width, label_height, pixmap):
         # Tạo QImage với kích thước của QLabel
@@ -324,7 +306,6 @@ class MainWindow:
     def open_folder(self):
         self.image = QFileDialog.getExistingDirectory(None, "Select Folder")
         if self.image:
-            self.delete()
             # Read folder
             for i in os.listdir(self.image):
                 if os.path.isfile(os.path.join(self.image, i)): # Check if it's a file (not a folder)
@@ -364,7 +345,6 @@ class MainWindow:
         self.image_hex = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
 
         if self.image_hex and self.image:
-            self.delete()
             # Open file ref
             with open(self.image_hex, 'rb') as f:
                 d4t4_r3f = f.read()
@@ -389,10 +369,8 @@ class MainWindow:
         self.image_raw = QFileDialog.getOpenFileName(None, "Select File", None ,filter='RAW files (*.CR2 *.NEF *.ARW);;All files (*)')[0]
 
         if self.image_raw and self.image:
-            self.delete()
 
             image_extension = self.image_raw.split('.')[-1].lower()
-
             folder0 = f"{os.path.dirname(self.image)}/Repaired"
             file0 = f"{folder0}/{os.path.basename(self.image)}"
 
@@ -456,8 +434,6 @@ class MainWindow:
         self.image_hex = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);; All files (*)')[0]
 
         if self.image_hex and self.image:
-            self.delete()
-
             with open(self.image_hex, 'rb') as f:
                 d4t4_r3f = f.read()
             st4rt_ind3x = d4t4_r3f.index(b'\xFF\xD8')
@@ -540,7 +516,6 @@ class MainWindow:
     # OK (main) - N10T5_25
     def Create_New_OK(self):
         # Exit & delete file
-        self.delete()
         self.Create_New.close()
         
         selected_item = self.uic_Create_New.listWidget.currentItem()  # Lấy item được chọn
@@ -579,7 +554,7 @@ class MainWindow:
                 with open(self.image, 'rb') as f1, open('temp_rp', 'wb') as f2:
                     f2.write(data_header + f1.read())
 
-            self.delete(2)
+
             self.image = "temp_rp"
             # print("Chay file main")
             self.main()
@@ -608,7 +583,6 @@ class MainWindow:
 
             if os.path.exists("temp_rp.jpg"):
                 # Rename & delete
-                self.delete()
                 os.rename("temp_rp.jpg", "temp_rp")
 
                 self.uic.textEdit.insertPlainText(f'👉 Successful processing')
@@ -626,40 +600,45 @@ class MainWindow:
         self.uic_edit_image.setupUi(self.sr_edit_image)
         self.sr_edit_image.show()
 
+        uic_ei = self.uic_edit_image        
+
         # Value
         self.im4g3 = self.ins3rt_d3l3t3 = ""
 
-        if self.image:
+        if self.image: # Rút gọn bởi claude
             time.sleep(1)
             subprocess.run(['./tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
 
             self.im4g3 = self.image
-            with open(self.image, 'rb') as r:
-                raw_data = r.read()
-                
-            img = Image.open(BytesIO(raw_data)).convert("RGB")
+            img = Image.open(self.image).convert("RGB")
             w, h = img.size
-            qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
-            pix = QPixmap.fromImage(qimg)
+            pix = QPixmap.fromImage(QImage(img.tobytes(), w, h, 3 * w, QImage.Format.Format_RGB888))
 
-            # pix = QPixmap(self.image)
-            self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pix)))
-            self.uic_edit_image.sbox_pixel_h.setValue(pix.height())
-            self.uic_edit_image.sbox_pixel_w.setValue(pix.width())
+            lb = uic_ei.label
+            lb.setPixmap(QPixmap.fromImage(self.view_label(lb.width(), lb.height(), pix)))
+            uic_ei.sbox_pixel_w.setValue(w)
+            uic_ei.sbox_pixel_h.setValue(h)
 
-        self.uic_edit_image.b_Open.clicked.connect(self.EI_open)
-        self.uic_edit_image.b_Save.clicked.connect(self.EI_save)
-        self.uic_edit_image.b_View.clicked.connect(self.EI_view)
 
-        self.uic_edit_image.b_pos.clicked.connect(lambda: self.EI_view_mcu())
 
-        self.uic_edit_image.b0x_d3l3t3.clicked.connect(self.EI_checkbox)
-        self.uic_edit_image.b0x_ins3rt.clicked.connect(self.EI_checkbox)
+        # Rút gọn phần self đi
+        uic_ei.b_Open.clicked.connect(self.EI_open)
+        uic_ei.b_Save.clicked.connect(self.EI_save)
+        uic_ei.b_View.clicked.connect(self.EI_view)
+
+        uic_ei.b_pos.clicked.connect(lambda: self.EI_view_mcu())
+
+        uic_ei.b0x_d3l3t3.clicked.connect(self.EI_checkbox)
+        uic_ei.b0x_ins3rt.clicked.connect(self.EI_checkbox)
 
         # Change num in slider
-        self.uic_edit_image.slider_cr.valueChanged.connect(lambda link: self.uic_edit_image.l_cr.setText(f"Cr = {self.uic_edit_image.slider_cr.value()}"))
-        self.uic_edit_image.slider_cb.valueChanged.connect(lambda link: self.uic_edit_image.l_cb.setText(f"Cb = {self.uic_edit_image.slider_cb.value()}"))
-        self.uic_edit_image.slider_y.valueChanged.connect(lambda link: self.uic_edit_image.l_y.setText(f"Y = {self.uic_edit_image.slider_y.value()}"))
+        uic_ei.slider_cr.valueChanged.connect(lambda v: uic_ei.l_cr.setText(f"Cr = {v}"))
+        uic_ei.slider_cb.valueChanged.connect(lambda v: uic_ei.l_cb.setText(f"Cb = {v}"))
+        uic_ei.slider_y.valueChanged.connect(lambda v: uic_ei.l_y.setText(f"Y = {v}"))
+
+
+
+
 
     # Save - D10M05Y26
     def EI_save(self):
@@ -667,14 +646,16 @@ class MainWindow:
         save_file = QFileDialog.getSaveFileName(None, "Save File", "" ,filter='JPEG files (*.JPG);; All files (*)')[0]
         if save_file and os.path.exists("temp_img.JPG"): shutil.copy("temp_img.JPG", save_file)
 
+
+
     # Check box - D10M05Y26
     def EI_checkbox(self):
-        if self.uic_edit_image.b0x_ins3rt.isChecked():
-            self.ins3rt_d3l3t3 = "insert"
-            self.uic_edit_image.b0x_d3l3t3.setChecked(False)
-        else:
-            self.ins3rt_d3l3t3 = "delete"
-            self.uic_edit_image.b0x_ins3rt.setChecked(False)
+        ui = self.uic_edit_image
+        self.ins3rt_d3l3t3 = "insert" if ui.b0x_ins3rt.isChecked() else "delete"
+        if ui.b0x_ins3rt.isChecked():
+            ui.b0x_d3l3t3.setChecked(False)
+
+
 
     # Open File - D10M05Y26
     def EI_open(self):
@@ -699,9 +680,17 @@ class MainWindow:
                 self.uic_edit_image.sbox_pixel_h.setValue(h)
                 self.uic_edit_image.sbox_pixel_w.setValue(w)
 
+
+
+
     def EI_view_mcu(self):
         self.mcu_viewer = MCUViewer()
         self.mcu_viewer.show()
+
+
+
+
+
         
     # View - D10M05Y26
     def EI_view(self):
@@ -736,7 +725,7 @@ class MainWindow:
 
                 #                                                     file in        file out
                 if self.ins3rt_d3l3t3: pr0c = ["./tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-                else: pr0c = ["./Tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+                else: pr0c = ["./tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
 
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -746,7 +735,7 @@ class MainWindow:
             else:
                 #                                                     file in        file out
                 if self.ins3rt_d3l3t3: pr0c = ["./tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-                else: pr0c = ["./Tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
+                else: pr0c = ["./tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
 
                 startupinfo = subprocess.STARTUPINFO()
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -763,6 +752,10 @@ class MainWindow:
 
             # View
             self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
+
+
+
+
 
 
 
