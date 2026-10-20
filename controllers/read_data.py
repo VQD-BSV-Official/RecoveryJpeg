@@ -1,70 +1,42 @@
+SOI_1, SOI_2, EOI = b'\xFF\xDB\x00\x84', b'\xFF\xDB\x00\x43', b'\xFF\xD9'
+CHUNK = 1024
+
+# Claude tối ưu lại
 def check_end(filename):
-    with open(filename, "rb") as f:
-        f.seek(-2, 2)  # nhảy tới 2 byte cuối (2 = SEEK_END)
-        last2 = f.read(2)
-
-    if last2 != b"\xFF\xD9":
-        # print(f"{filename}: thiếu FF D9, thêm vào...")
-        with open(filename, "ab") as f:  # ghi nối vào cuối
-            f.write(b"\xFF\xD9")
-    else:
-        pass
-        # print(f"{filename}: đã đúng.")
-
+    with open(filename, "r+b") as f:
+        f.seek(-2, 2)                 # 2 byte cuối (2 = SEEK_END)
+        if f.read(2) != EOI:
+            f.write(EOI)              # thiếu FF D9 thì ghi nối vào cuối
 
 
 def read_data(image):
     check_end(image)
+    list_offset = []
 
     with open(image, 'rb') as dump:
-        list_offset = []
-        while True: # Đọc file (image)
-            pos = dump.tell()
-            buf = dump.read(1024)
-            if not buf: # Đọc đến hết
-                break
+        while buf := dump.read(CHUNK):
+            pos = dump.tell() - len(buf)
 
-
-            idx = buf.find(b'\xFF\xDB\x00\x84')
-            if idx < 0: # Tìm 2 điểm bắt đầu
-                idx = buf.find(b'\xFF\xDB\x00\x43')
-                if idx < 0:
-                    dump.seek(pos + 1024)
-                    continue
+            # Tìm điểm bắt đầu (ưu tiên 0084, không có thì 0043)
+            idx = buf.find(SOI_1) if SOI_1 in buf else buf.find(SOI_2)
+            if idx < 0:
+                continue
 
             # Fix error (header FFC4)
             idx_2 = buf.find(b'\xFF\xC4')
-            if idx_2 < 0: pass
-            else: 
-                if idx_2 < idx: idx = idx_2
+            if 0 <= idx_2 < idx:
+                idx = idx_2
 
-            # print(idx_2)
+            start = pos + idx
+            dump.seek(start)
 
-
-            dump.seek(offset_start := pos + idx)
-
-            while True:
-                pos_end = dump.tell()
-                buf_end = dump.read(1024)
-                if not buf_end: # Đọc đến hết
+            # Tìm điểm cuối
+            while buf_end := dump.read(CHUNK):
+                idx_end = buf_end.find(EOI)
+                if idx_end > 0:
+                    end = dump.tell() - len(buf_end) + idx_end + 2
+                    list_offset.append(f'{start:X}x{end:X}')
+                    dump.seek(end)
                     break
 
-                idx_end = buf_end.find(b'\xFF\xD9')
-                if idx_end > 0: # Tìm điểm cuối
-                    offset_end = pos_end + idx_end + 2
-
-                    # Kết quả
-                    list_offset.append(f'{offset_start:X}x{offset_end:X}')
-                    # print(f'>> {offset_start:X}x{offset_end:X}')
-                    # self.uic.listWidget.addItem(f'{offset_start:X}x{offset_end:X}')
-
-                    dump.seek(offset_end)
-                    break
-
-                else:
-                    continue
-
-            if idx_end == -1:
-                print("hi")
-                    
     return list_offset
