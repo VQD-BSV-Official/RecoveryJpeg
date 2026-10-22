@@ -115,49 +115,29 @@ class MainWindow:
         u.listWidget.itemClicked.connect(self.item_clicked)
 
 
-    def make_square_thumbnail(self, pixmap: QPixmap) -> QPixmap:
-        """
-        Vẽ pixmap đã scaled vào 1 QPixmap kích thước cố định (self.thumb_size),
-        canh giữa, background trắng (hoặc trong suốt nếu bạn muốn).
-        """
-        # Scale giữ tỉ lệ
-        scaled = pixmap.scaled(
-            self.thumb_w, self.thumb_h,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
-        )
-
-        base = QPixmap(self.thumb_w, self.thumb_h)
-        base.fill(Qt.GlobalColor.white)  # đổi sang transparent nếu muốn
-
-        painter = QPainter(base)
-        x = (self.thumb_w - scaled.width()) // 2
-        y = (self.thumb_h - scaled.height()) // 2
-        painter.drawPixmap(x, y, scaled)
-        painter.end()
-        
-        return base
-
-
     def add_image(self, item_off):
-        # Parse offset hex - Kiểu "0xSTARTxEND" từ hex -> offset
+        # Parse offset hex - kiểu "0xSTARTxEND"
         self.start, self.end = (int(x, 16) for x in item_off.split('x'))
-        
-        with open(self.image, "rb") as f:
-            f.seek(self.start) # Di chỏ đến offset
-            data = f.read(self.end - self.start)
-            
-            if pixmap := self.read_image(data):
-                # Create thumbnail and list item
-                thumb = self.make_square_thumbnail(pixmap) # Kích thước của ảnh
-                item = QListWidgetItem(QIcon(thumb), f"{pixmap.width()}x{pixmap.height()}")
 
-                # Ép size ô bằng grid_size để đồng nhất & căn chữ giữa
-                item.setSizeHint(self.grid_size) 
-                item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter)
-                item.setToolTip(item_off)
-                
-                self.uic.listWidget.addItem(item)
+        with open(self.image, "rb") as f:
+            f.seek(self.start)
+            data = f.read(self.end - self.start)
+
+        if pixmap := self.read_image(data):
+            # Thumbnail vuông: scale giữ tỉ lệ, canh giữa trên nền trắng
+            scaled = pixmap.scaled(self.thumb_w, self.thumb_h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            thumb = QPixmap(self.thumb_w, self.thumb_h)
+            thumb.fill(Qt.GlobalColor.white)  # đổi sang transparent nếu muốn
+
+            painter = QPainter(thumb)
+            painter.drawPixmap((self.thumb_w - scaled.width()) // 2,(self.thumb_h - scaled.height()) // 2, scaled)
+            painter.end()
+
+            item = QListWidgetItem(QIcon(thumb), f"{pixmap.width()}x{pixmap.height()}")
+            item.setSizeHint(self.grid_size)
+            item.setTextAlignment(Qt.AlignmentFlag.AlignHCenter)
+            item.setToolTip(item_off)
+            self.uic.listWidget.addItem(item)
 
 # ══════════════════════════════════════════ 🧠 MAIN 🧠 ═════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -195,8 +175,17 @@ class MainWindow:
     def read_image(self, data):
         pixmap = QPixmap()
         if not pixmap.loadFromData(b"\xFF\xD8" + data, "JPEG"):
-            self.uic.textEdit.insertPlainText("...❌ - ReadImage")
-            return None
+            try:
+                # Code beta
+                img = Image.open(BytesIO(b"\xFF\xD8" + data)).convert("RGB")
+                w, h = img.size
+                qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+                pixmap = QPixmap.fromImage(qimg)
+
+            except Exception as e:
+                self.uic.textEdit.insertPlainText("...❌ - ReadImage")
+                return None
+            
         return pixmap
 
 
