@@ -146,7 +146,7 @@ class MainWindow:
         if not self.image: return
 
         offsets = read_data(self.image)
-        self.uic.textEdit.insertPlainText("..................✅" if offsets else "..................❌")
+        self.uic.textEdit.insertPlainText("\n     ✅ Open >> Read >> Found" if offsets else "\n     ❌ Open >> Read >> Not found")
         for offset in offsets:
             self.add_image(offset)
             
@@ -211,8 +211,8 @@ class MainWindow:
     def decode_image(self):
         if self.image:
             decode_jpeg(self.image, os.path.splitext(self.image)[0] + "_decode.jpg")
-            self.uic.textEdit.append("✅ Decode")
-        else: self.uic.textEdit.append("❌ Can't decode")
+            self.uic.textEdit.append("     ✅ Decode")
+        else: self.uic.textEdit.append("     ❌ Can't decode")
 
 
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -231,7 +231,7 @@ class MainWindow:
     def save_file(self):
         self.save_image = QFileDialog.getSaveFileName(None, "Save File", None ,filter='JPEG files (*.JPG);; All files (*)')[0]
         if not (self.save_image and self.image and self.start):
-            self.uic.textEdit.append("❌ Can't save")
+            self.uic.textEdit.append("     ❌ Can't save")
             return
         
     
@@ -244,18 +244,22 @@ class MainWindow:
         # Tìm marker có offset nhỏ nhất
         fr0mh3x = self._find_earliest_marker(cropped_data, self.MARKER_SOI)
         if fr0mh3x:
-            with open(self.save_image, 'wb') as f:
-                f.write(self.JPEG_HEADER + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
-            self.uic.textEdit.append(f'''💾 Save File: {self.start:X}x{self.end:X} --> {self.save_image}''')
-        else: self.uic.textEdit.append("❌ Can't save (marker not found)")
+            if b"\xFF\xC4" in cropped_data[:2]: data = b"\xFF\xD8" + cropped_data # Riêng cho header FF D8 FF C4
+            else: data = self.JPEG_HEADER + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):]
+
+            with open(self.save_image, "wb") as f:
+                f.write(data)
+
+            self.uic.textEdit.append(f'''     💾 Save >> {self.start:X}x{self.end:X} >> {os.path.basename(self.save_image)}''')
+        else: self.uic.textEdit.append("     ❌ Can't save (marker not found)")
 
 
     # Export Folder - N26T9_25 - OK have check error
     def export_folder(self):
         self.export_path = QFileDialog.getExistingDirectory(None, "Select Folder")
         if not (self.export_path and self.uic.listWidget.count()):
-            self.uic.textEdit.append("❌ Can't export folder")
+            self.uic.textEdit.append("     ❌ Can't Export")
             return
         
 
@@ -277,7 +281,7 @@ class MainWindow:
                 with open(out_path, "wb") as out:
                     out.write(self.JPEG_HEADER + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
 
-        self.uic.textEdit.append(f"💾 Export Folder: {self.export_path}")
+        self.uic.textEdit.append(f"     💾 Export >> {self.export_path}")
 
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -295,7 +299,7 @@ class MainWindow:
             # View & log
             self.uic.textEdit.append(f'📂 Folder: {self.image}')
             self.image = "temp_rp"
-        else: self.uic.textEdit.append(f'''❌ Can't open folder''')
+        else: self.uic.textEdit.append(f'''     ❌ Can't open folder''')
 
         # Reset list & label
         self.uic.listWidget.clear()
@@ -307,8 +311,8 @@ class MainWindow:
     # Open File - N26T9_25 - OK - check error
     def open_file(self):
         self.image = QFileDialog.getOpenFileName(None, "Select File", None ,filter='JPEG files (*.JPEG *.JPG);;RAW files (*.CR2 *.CR3 *.NEF *.ARW *.RAF);;All files (*)')[0]
-        if self.image: self.uic.textEdit.append(f'🗃 File: {self.image}')
-        else: self.uic.textEdit.append(f'''❌ Can't open file''')
+        if self.image: self.uic.textEdit.append(f'~~~~~~~~~~~~~~~~~~\n⭕ {os.path.basename(self.image)}')
+        else: self.uic.textEdit.append(f'''     ❌ Can't open file''')
 
         # Reset list & label
         self.uic.listWidget.clear()
@@ -475,7 +479,7 @@ class MainWindow:
                 f1.seek(offset)
                 shutil.copyfileobj(f1, f2)
 
-            self.uic.textEdit.append('🔍 Please wait for image processing')
+            self.uic.textEdit.append('     🔍 Please wait...')
 
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -485,11 +489,11 @@ class MainWindow:
 
             if os.path.exists("temp_rp.jpg"):
                 os.replace("temp_rp.jpg", "temp_rp")
-                self.uic.textEdit.insertPlainText('👉 Successful processing')
+                self.uic.textEdit.insertPlainText('     👉 Successful processing')
                 self.image = "temp_rp"
                 self.main()
             else:
-                self.uic.textEdit.insertPlainText('👉 Processing failed')
+                self.uic.textEdit.insertPlainText('     👉 Processing failed')
 
 # ═════════════════════════════════════════ 💻 UI EDIT 💻 ═══════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -516,8 +520,8 @@ class MainWindow:
 
             lb = uic_ei.label
             lb.setPixmap(QPixmap.fromImage(self.view_label(lb.width(), lb.height(), pix)))
-            uic_ei.sbox_pixel_w.setValue(w)
-            uic_ei.sbox_pixel_h.setValue(h)
+            # uic_ei.sbox_pixel_w.setValue(w)
+            # uic_ei.sbox_pixel_h.setValue(h)
 
 
 
@@ -528,8 +532,8 @@ class MainWindow:
 
         uic_ei.b_pos.clicked.connect(lambda: self.EI_view_mcu())
 
-        uic_ei.b0x_d3l3t3.clicked.connect(self.EI_checkbox)
-        uic_ei.b0x_ins3rt.clicked.connect(self.EI_checkbox)
+        # uic_ei.b0x_d3l3t3.clicked.connect(self.EI_checkbox)
+        # uic_ei.b0x_ins3rt.clicked.connect(self.EI_checkbox)
 
         # Change num in slider
         uic_ei.slider_cr.valueChanged.connect(lambda v: uic_ei.l_cr.setText(f"Cr = {v}"))
@@ -549,11 +553,11 @@ class MainWindow:
 
 
     # Check box - D10M05Y26
-    def EI_checkbox(self):
-        ui = self.uic_edit_image
-        self.ins3rt_d3l3t3 = "insert" if ui.b0x_ins3rt.isChecked() else "delete"
-        if ui.b0x_ins3rt.isChecked():
-            ui.b0x_d3l3t3.setChecked(False)
+    # def EI_checkbox(self):
+    #     ui = self.uic_edit_image
+    #     self.ins3rt_d3l3t3 = "insert" if ui.b0x_ins3rt.isChecked() else "delete"
+    #     if ui.b0x_ins3rt.isChecked():
+    #         ui.b0x_d3l3t3.setChecked(False)
 
 
 
@@ -575,10 +579,9 @@ class MainWindow:
 
             if pixmap:
                 self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
-
-                w = pixmap.width(); h = pixmap.height()
-                self.uic_edit_image.sbox_pixel_h.setValue(h)
-                self.uic_edit_image.sbox_pixel_w.setValue(w)
+                # w = pixmap.width(); h = pixmap.height()
+                # self.uic_edit_image.sbox_pixel_h.setValue(h)
+                # self.uic_edit_image.sbox_pixel_w.setValue(w)
 
 
 
