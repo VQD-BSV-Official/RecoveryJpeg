@@ -552,14 +552,6 @@ class MainWindow:
 
 
 
-    # Check box - D10M05Y26
-    # def EI_checkbox(self):
-    #     ui = self.uic_edit_image
-    #     self.ins3rt_d3l3t3 = "insert" if ui.b0x_ins3rt.isChecked() else "delete"
-    #     if ui.b0x_ins3rt.isChecked():
-    #         ui.b0x_d3l3t3.setChecked(False)
-
-
 
     # Open File - D10M05Y26
     def EI_open(self):
@@ -598,6 +590,9 @@ class MainWindow:
         ui = self.uic_edit_image # Code rút gọn
         cr, cb, y = map(lambda s: str(s.value()), [ui.slider_cr, ui.slider_cb, ui.slider_y])
         blocks, mcu_x, mcu_y = map(lambda s: str(s.value()), [ui.spinBox, ui.sbox_mcu_x, ui.sbox_mcu_y])
+
+
+        self.ins3rt_d3l3t3 = "delete" if ui.radio1.isChecked() else "insert"
 
         # pixel_h = str(self.uic_edit_image.sbox_pixel_h.value())
         # pixel_w = str(self.uic_edit_image.sbox_pixel_w.value())
@@ -644,10 +639,20 @@ class MainWindow:
             with open("temp_img.JPG", "rb") as f:
                 raw_data = f.read()
 
-            img = Image.open(BytesIO(raw_data)).convert("RGB")
-            w, h = img.size
-            qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
-            pixmap = QPixmap.fromImage(qimg)
+            pixmap = QPixmap()
+            if not pixmap.loadFromData(raw_data, "JPEG"):
+                # Code beta
+                img = Image.open(BytesIO(raw_data)).convert("RGB")
+                w, h = img.size
+                qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+                pixmap = QPixmap.fromImage(qimg)
+
+
+
+            # img = Image.open(BytesIO(raw_data)).convert("RGB")
+            # w, h = img.size
+            # qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+            # pixmap = QPixmap.fromImage(qimg)
 
             # View
             self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
