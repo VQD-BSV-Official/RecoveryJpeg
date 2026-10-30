@@ -19,14 +19,20 @@
 - 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, but most ransomware with 4 characters at the end uses this encoding.
 
 
-<img width="636" height="549" alt="image" src="https://github.com/user-attachments/assets/c2a167e6-a631-4445-9bca-d88b2e52081d" />
 
-
-| Chroma Subsampling | MCU Size | Typical Cameras |
-|---|---|---|
-| **4:4:4** | 8 | Higher-end compacts, some DSLRs |
-| **4:2:2** | 16 | Canon DSLRs (default JPEG) |
-| **4:2:0** | 16 | Most phones, consumer cameras |
+| Short name | Bytes | Payload | Name | Comments |
+|:---:|:---:|:---:|---|---|
+| **SOI** | `FF D8` | `none` | Start Of Image | |
+| **SOF0** | `FF C0` | `variable` | Start Of Frame (baseline DCT) | Indicates that this is a baseline DCT-based JPEG, and specifies the width, height, number of components, and component subsampling (e.g., 4:2:0). |
+| **SOF2** | `FF C2` | `variable` | Start Of Frame (progressive DCT) | Indicates that this is a progressive DCT-based JPEG, and specifies the width, height, number of components, and component subsampling (e.g., 4:2:0). |
+| **DHT** | `FF C4` | `variable` | Define Huffman Table(s) | Specifies one or more Huffman tables. |
+| **DQT** | `FF DB` | `variable` | Define Quantization Table(s) | Specifies one or more quantization tables. |
+| **DRI** | `FF DD` | `4 bytes` | Define Restart Interval | Specifies the interval between RSTn markers, in Minimum Coded Units (MCUs). This marker is followed by two bytes indicating the fixed size so it can be treated like any other variable size segment. |
+| **SOS** | `FF DA` | `variable` | Start Of Scan | Begins a top-to-bottom scan of the image. In baseline DCT JPEG images, there is generally a single scan. Progressive DCT JPEG images usually contain multiple scans. This marker specifies which slice of data it will contain, and is immediately followed by entropy-coded data. |
+| **RSTn** | `FF Dn`<br>`(n = 0..7)` | `none` | Restart | Inserted every *r* macroblocks, where *r* is the restart interval set by a DRI marker. Not used if there was no DRI marker. The low three bits of the marker code cycle in value from 0 to 7. |
+| **APPn** | `FF En` | `variable` | Application-specific | For example, an Exif JPEG file uses an APP1 marker to store metadata, laid out in a structure based closely on TIFF. |
+| **COM** | `FF FE` | `variable` | Comment | Contains a text comment. |
+| **EOI** | `FF D9` | `none` | End Of Image | |
 
 
 ---
