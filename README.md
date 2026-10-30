@@ -8,14 +8,14 @@
 
 [![Python](https://img.shields.io/badge/Python-3.x-blue?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![PyQt6](https://img.shields.io/badge/GUI-PyQt6-538CC9?style=for-the-badge&logo=qt&logoColor=white)](https://www.riverbankcomputing.com/software/pyqt/intro) <br>
-Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp) · [JpegDecomp](https://github.com/albmac/jpeg-decomp) · [JPEGVisualRepairTool](https://github.com/albmac/JPEGVisualRepairTool) · [JpegRepairShop](https://anderspedersen.net/jpegrepair/) · [Wikipedia](https://en.wikipedia.org/wiki/JPEG)
 
 
 ## 🖼️ Recover Your Photos
-3 ways to repair JPEG:
-- 🧩 Extract thumbnails (We will find the bytes from FFDB to FFD9, which are the thumbnails. We will extract them.)
-- 🛠️ Replace header (Replace the first byte of FF D8 with FF DA of the other file.)  
-- 🔗 Concatenate MCUs (Advanced MCU editing)
+| Method | Description |
+|---|---|
+| 🧩 Thumbnail Extraction | Extract embedded JPEG thumbnails by locating image data between `FFDB` and `FFD9` markers where applicable. |
+| 🛠️ Header Replacement | Attempt to reconstruct damaged JPEG headers using valid structural information from another file. |
+| 🔗 MCU Concatenation | Advanced recovery through MCU (Minimum Coded Unit) manipulation and reconstructi
 - 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, but most ransomware with 4 characters at the end uses this encoding.
 
 
@@ -29,6 +29,27 @@ Learn From: [JpegRepair](https://github.com/dmahurin/jpegrepair) · [JpegRecover
 | **4:2:0** | 16 | Most phones, consumer cameras |
 
 
+---
+
+## 📚 References & Acknowledgements
+
+This project was developed through independent research and learning from the following resources:
+
+- [JpegRepair](https://github.com/dmahurin/jpegrepair)
+- [JpegRecovery](https://github.com/euzun/jpeg-carver-csharp)
+- [JpegDecomp](https://github.com/albmac/jpeg-decomp)
+- [JPEGVisualRepairTool](https://github.com/albmac/JPEGVisualRepairTool)
+- [JpegRepairShop](https://anderspedersen.net/jpegrepair/)
+- [Wikipedia – JPEG](https://en.wikipedia.org/wiki/JPEG)
+
+Thanks to the developers and communities behind these resources.
+
+---
+
+## ⚙️ Build Executable
+```bash
+pyinstaller --noconfirm --onefile --windowed --icon "resources/logo.ico" --name "RecoveryJpeg" --clean --log-level "INFO" --noupx --version-file "VERSION" "main.pyw"
+```
 ## Usage - 🎬 Demo Video
 <a href="https://youtu.be/oKuoWYz6NP8">
   <img src="https://img.youtube.com/vi/oKuoWYz6NP8/maxresdefault.jpg" width="600">
