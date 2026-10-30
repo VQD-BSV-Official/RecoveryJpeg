@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>Logo/logo.ico</normaloff>Logo/logo.ico</iconset>
+    <normaloff>resources/logo.ico</normaloff>resources/logo.ico</iconset>
   </property>
   <widget class="QLabel" name="label">
    <property name="geometry">
@@ -30,7 +30,7 @@
     <string/>
    </property>
    <property name="pixmap">
-    <pixmap>Logo/logo.ico</pixmap>
+    <pixmap>resources/logo.ico</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>
@@ -52,7 +52,7 @@
     </font>
    </property>
    <property name="text">
-    <string>RecoveryJpeg v1.8.0</string>
+    <string>RecoveryJpeg v1.9.1</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -91,7 +91,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;RecoveryJpeg uses other tools such as JpegRepair, JpegRecovery, Irfan. The software was created for the purpose of restoring photos.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;RecoveryJpeg uses other tools such as JpegRepair, JpegRecovery, JpegDecomp, Irfan. The software was created for the purpose of restoring photos.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QPushButton" name="b_OK">

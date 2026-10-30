@@ -1,4 +1,8 @@
 import sys, struct
+from PIL import Image, ImageFile
+from io import BytesIO
+
+
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QLabel, QScrollArea, 
                              QVBoxLayout, QWidget, QFileDialog, QMessageBox)
 from PyQt6.QtGui import QPixmap, QImage, QPainter, QPen, QWheelEvent
@@ -65,8 +69,17 @@ class MCUViewer(QMainWindow):
 
     def load_image(self):
         try:
+            ImageFile.LOAD_TRUNCATED_IMAGES = True
+            with open(self.image_path, "rb") as f:
+                raw_data = f.read()
+
+            img = Image.open(BytesIO(raw_data)).convert("RGB")
+            w, h = img.size
+            qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
+            self.original_pixmap = QPixmap.fromImage(qimg)
+
             # Load image
-            self.original_pixmap = QPixmap(self.image_path)
+            # self.original_pixmap = QPixmap(self.image_path)
             if self.original_pixmap.isNull():
                 raise ValueError("Could not load image")
                 

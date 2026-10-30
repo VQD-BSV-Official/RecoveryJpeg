@@ -11,11 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>RecoveryJpeg v1.9.0</string>
+   <string>RecoveryJpeg v1.9.1</string>
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>Logo/logo.ico</normaloff>Logo/logo.ico</iconset>
+    <normaloff>resources/logo.ico</normaloff>resources/logo.ico</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
