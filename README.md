@@ -13,11 +13,18 @@
 ## 🖼️ Recover Your Photos
 | Method | Description |
 |---|---|
-| 🧩 Thumbnail Extraction | Extract embedded JPEG thumbnails by locating image data between `FFDB` and `FFD9` markers where applicable. |
-| 🛠️ Header Replacement | Attempt to reconstruct damaged JPEG headers using valid structural information from another file. |
-| 🔗 MCU Concatenation | Advanced recovery through MCU (Minimum Coded Unit) manipulation and reconstructi
-- 153605 is the number of bytes encoded at the beginning of the file. Different ransomware types have different encryption methods, but most ransomware with 4 characters at the end uses this encoding.
+| 🧩 Extract Thumbnails | Extract JPEG thumbnail bytes `FFDB0084` or `FFDB0043` |
+| 🛠️ Replace Headers | Use valid structure information from another file `FF DA 00` (SOS). |
+| 🔗 Interlock MCU | Advanced recovery through MCU manipulation and reconstruction (Minimum Encoding Unit).
 
+| Term | Explanation |
+|------|-------------|
+| **MCU** | Minimum Coded Unit. The fundamental processing unit in JPEG entropy coding. |
+| **DCT** | Discrete Cosine Transform. Used to transform image data into frequency coefficients. |
+| **Huffman Coding** | Entropy coding method used in standard DCT-based JPEG. |
+| **Quantization** | Reduces DCT coefficient precision to achieve lossy compression. |
+| **Entropy-Coded Data** | Compressed image data stored after an SOS marker. |
+| **Restart Interval** | Number of MCUs between consecutive restart markers. |
 
 
 | Short name | Bytes | Payload | Name | Comments |
