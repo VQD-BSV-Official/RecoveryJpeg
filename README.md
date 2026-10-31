@@ -62,10 +62,26 @@ Thanks to the developers and communities behind these resources.
 
 ---
 
-## ⚙️ Build Executable
+## 🚀 Running the Application
+
+- **Build Executable**
 ```bash
 pyinstaller --noconfirm --onefile --windowed --icon "resources/logo.ico" --name "RecoveryJpeg" --clean --log-level "INFO" --noupx --version-file "VERSION" "main.pyw"
 ```
+
+- **Libs**
+```
+pip install PyQt6 pillow
+```
+
+- **Run**
+```bash
+python "main.pyw"
+```
+
+
+
+
 ## Usage - 🎬 Demo Video
 <a href="https://youtu.be/oKuoWYz6NP8">
   <img src="https://img.youtube.com/vi/oKuoWYz6NP8/maxresdefault.jpg" width="600">
