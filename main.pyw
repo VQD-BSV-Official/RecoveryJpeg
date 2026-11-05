@@ -2,6 +2,7 @@
 # >>> SYSTEM ⚙️ ──────────────────────────────
 import sys, os, subprocess, binascii, shutil, time
 from io import BytesIO
+from pathlib import Path
 
 # /////////////////////////////////////////////
 # >>> THIRD-PARTY 👾 ─────────────────────────
@@ -43,6 +44,23 @@ class MainWindow:
         self.main_win = QMainWindow()
         self.uic = Ui_MainWindow()
         self.uic.setupUi(self.main_win)
+
+
+        required = ["JpegDecomp.exe", "JpegRepair.exe", "JpegRecovery.exe"]
+        missing = [f for f in required if not (Path("tool") / f).is_file()]
+
+        if missing:
+            raise FileNotFoundError(
+                "Missing tools:\n"
+                + "\n".join(f"- {f}" for f in missing)
+                + "\n\nPlease add missing files or rebuild via Git Submodules.\n\n"
+                "Unavailable features:\n"
+                "- Decode image\n"
+                "- Insert/Delete Y, Cb, Cr\n"
+                "- Auto Recover JPEG"
+            )
+
+
 
 
         self.JPEG_HEADER = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
