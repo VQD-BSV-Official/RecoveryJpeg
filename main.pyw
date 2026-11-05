@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import Image, ImageFile  # Image processing
 
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QShortcut, QKeySequence, QPixmap, QIcon, QImage, QPainter, QFontMetrics, QPalette, QColor
+from PyQt6.QtGui import QShortcut, QKeySequence, QPixmap, QIcon, QImage, QPainter, QFontMetrics
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -17,16 +17,12 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QListView,
-    QAbstractItemView,
 )
 
 # /////////////////////////////////////////////
 # >>> CORE 🕵️ ───────────────────────────────
-from controllers.read_data import read_data
-from controllers.view_mcu import MCUViewer
-from controllers.image_canvas import ImageCanvas, jpeg_mcu
-from controllers.s0_decode import decode_jpeg
-from controllers.s3_delete import delete_mcu
+from controllers.jpeg_tools import read_data, decode_jpeg, delete_mcu, jpeg_mcu
+from controllers.image_canvas import ImageCanvas
 
 # /////////////////////////////////////////////
 # >>> UI 💻 ──────────────────────────────────
@@ -36,6 +32,24 @@ from views.Widget.Create import Ui_Create_New
 from views.Widget.Edit_Image import Ui_Edit_Image
 
 
+
+
+def _run(args, wait=True):
+    si = subprocess.STARTUPINFO(); si.dwFlags |= subprocess.STARTF_USESHOWWINDOW  # ẩn console
+    return subprocess.run(args, startupinfo=si) if wait else subprocess.Popen(args, startupinfo=si)
+
+
+def to_pixmap(raw):
+    """JPEG bytes (đủ FFD8) -> QPixmap; fallback PIL cho ảnh lỗi/truncated."""
+    pm = QPixmap()
+    if pm.loadFromData(raw, "JPEG"): return pm
+    try:
+        img = Image.open(BytesIO(raw)).convert("RGB")
+        w, h = img.size
+        buf = img.tobytes()
+        return QPixmap.fromImage(QImage(buf, w, h, 3 * w, QImage.Format.Format_RGB888))
+    except Exception:
+        return None
 
 
 # ══════════════════════════════════════════ 🧩 CLASS 🧩 ════════════════════════════════════════════
@@ -65,7 +79,7 @@ class MainWindow:
 
 
         self.JPEG_HEADER = bytes.fromhex('FFD8FFE1007C45786966000049492A000800000003000E010200270000003200000012010300010000000100000031010200190000005A000000000000005265706169726564206279205175616E6720446169202020200000000000000000000009000000005265636F766572794A7065672000000000000000000000000000')
-        self.MARKER_SOI  = {b"\xFF\xDB\x00\x84": "FFDB0084", b"\xFF\xDB\x00\x43": "FFDB0043", }
+        self.MARKERS = (b"\xFF\xDB\x00\x84", b"\xFF\xDB\x00\x43")
 
         ImageFile.LOAD_TRUNCATED_IMAGES = True
 
@@ -191,24 +205,9 @@ class MainWindow:
         return image  
 
 
-    def read_image(self, data):
-        pixmap = QPixmap()
-        if not pixmap.loadFromData(b"\xFF\xD8" + data, "JPEG"):
-            try:
-                # Code beta
-                img = Image.open(BytesIO(b"\xFF\xD8" + data)).convert("RGB")
-                w, h = img.size
-                qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
-                pixmap = QPixmap.fromImage(qimg)
-
-            except Exception as e:
-                self.uic.textEdit.insertPlainText("...❌ - ReadImage")
-                return None
-            
-        return pixmap
-
-
-
+    def read_image(self, data):  # data không gồm SOI
+        if (pm := to_pixmap(b"\xFF\xD8" + data)) is None: self.uic.textEdit.insertPlainText("...❌ - ReadImage")
+        return pm
 
     # Click Item & View - N24T1_25
     def item_clicked(self, item):
@@ -236,96 +235,62 @@ class MainWindow:
 
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
-    def _find_earliest_marker(self, data: bytes, markers: dict) -> str | None:
-        min_offset, result = None, None
-        for k, v in markers.items():
-            pos = data.find(k)
-            if pos != -1 and (min_offset is None or pos < min_offset):
-                min_offset, result = pos, v
-
-        return result
+    def _repaired(self, raw):
+        """Gắn header chuẩn vào dữ liệu từ DQT đầu tiên; None nếu không có marker."""
+        pos = [p for p in map(raw.find, self.MARKERS) if p >= 0]
+        if not pos: return None
+        return b"\xFF\xD8" + raw if raw[:2] == b"\xFF\xC4" else self.JPEG_HEADER + raw[min(pos):]  # FF D8 FF C4 giữ nguyên
 
 
-    # Save File - N26T9_25 - OK have check error
+    # Save File - N26T9_25
     def save_file(self):
-        self.save_image = QFileDialog.getSaveFileName(None, "Save File", None ,filter='JPEG files (*.JPG);; All files (*)')[0]
-        if not (self.save_image and self.image and self.start):
-            self.uic.textEdit.append("     ❌ Can't save")
-            return
-        
-    
-
-        with open(self.image, "rb") as file:
-            file.seek(self.start) # Di chỏ đến offset
-            cropped_data = file.read(self.end - self.start)
-
-        # ////////////////////////////////////////
-        # Tìm marker có offset nhỏ nhất
-        fr0mh3x = self._find_earliest_marker(cropped_data, self.MARKER_SOI)
-        if fr0mh3x:
-
-            if b"\xFF\xC4" in cropped_data[:2]: data = b"\xFF\xD8" + cropped_data # Riêng cho header FF D8 FF C4
-            else: data = self.JPEG_HEADER + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):]
-
-            with open(self.save_image, "wb") as f:
-                f.write(data)
-
-            self.uic.textEdit.append(f'''     💾 Save >> {self.start:X}x{self.end:X} >> {os.path.basename(self.save_image)}''')
-        else: self.uic.textEdit.append("     ❌ Can't save (marker not found)")
-
-
-    # Export Folder - N26T9_25 - OK have check error
-    def export_folder(self):
-        self.export_path = QFileDialog.getExistingDirectory(None, "Select Folder")
-        if not (self.export_path and self.uic.listWidget.count()):
-            self.uic.textEdit.append("     ❌ Can't Export")
-            return
-        
+        path = QFileDialog.getSaveFileName(None, "Save File", None, filter='JPEG files (*.JPG);; All files (*)')[0]
+        if not (path and self.image and self.start):
+            self.uic.textEdit.append("     ❌ Can't save"); return
 
         with open(self.image, "rb") as f:
-            for idx in range(self.uic.listWidget.count()):
-                start, end = map(lambda x: int(x, 16), self.uic.listWidget.item(idx).toolTip().split("x"))
-                print(self.uic.listWidget.item(idx).text().split("x"))
-                
+            f.seek(self.start)
+            raw = f.read(self.end - self.start)
+
+        if (data := self._repaired(raw)) is None:
+            self.uic.textEdit.append("     ❌ Can't save (marker not found)"); return
+        Path(path).write_bytes(data)
+        self.uic.textEdit.append(f"     💾 Save >> {self.start:X}x{self.end:X} >> {os.path.basename(path)}")
+
+
+    # Export Folder - N26T9_25
+    def export_folder(self):
+        out, lw = QFileDialog.getExistingDirectory(None, "Select Folder"), self.uic.listWidget
+        if not (out and lw.count()):
+            self.uic.textEdit.append("     ❌ Can't Export"); return
+
+        with open(self.image, "rb") as f:
+            for i in range(lw.count()):
+                start, end = (int(x, 16) for x in lw.item(i).toolTip().split("x"))
                 f.seek(start)
-                cropped_data = f.read(end - start)
+                if data := self._repaired(f.read(end - start)): Path(out, f"IMG_{i+1}.JPG").write_bytes(data)
 
-                # ////////////////////////////////////////
-                # Tìm marker có offset nhỏ nhất
-                fr0mh3x = self._find_earliest_marker(cropped_data, self.MARKER_SOI)
-                if not fr0mh3x:
-                    continue  # bỏ qua nếu không tìm thấy marker
-
-                out_path = f"{self.export_path}/IMG_{idx+1}.JPG"
-                with open(out_path, "wb") as out:
-                    out.write(self.JPEG_HEADER + cropped_data[cropped_data.index(bytes.fromhex(fr0mh3x)):])
-
-        self.uic.textEdit.append(f"     💾 Export >> {self.export_path}")
+        self.uic.textEdit.append(f"     💾 Export >> {out}")
 
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Open Folder - N26T9_25 - OK - check error
     def open_folder(self):
-        self.image = QFileDialog.getExistingDirectory(None, "Select Folder")
-        if self.image:
-            # Read folder
-            for i in os.listdir(self.image):
-                if os.path.isfile(os.path.join(self.image, i)): # Check if it's a file (not a folder)
-                    with open(f"{self.image}/{i}", "rb") as r:
-                        with open("temp_rp", "ab") as w:
-                            w.write(r.read())
-
-            # View & log
-            self.uic.textEdit.append(f'📂 Folder: {self.image}')
+        folder, self.image = QFileDialog.getExistingDirectory(None, "Select Folder"), ""
+        if folder:
+            with open("temp_rp", "wb") as w:  # nối mọi file trong folder
+                for n in os.listdir(folder):
+                    if os.path.isfile(p := os.path.join(folder, n)):
+                        with open(p, "rb") as r: shutil.copyfileobj(r, w)
+            self.uic.textEdit.append(f'📂 Folder: {folder}')
             self.image = "temp_rp"
-        else: self.uic.textEdit.append(f'''     ❌ Can't open folder''')
+        else: self.uic.textEdit.append("     ❌ Can't open folder")
 
         # Reset list & label
         self.uic.listWidget.clear()
         self.uic.label.clear()
 
         self.main()
-
 
     # Open File - N26T9_25 - OK - check error
     def open_file(self):
@@ -500,11 +465,9 @@ class MainWindow:
 
             self.uic.textEdit.append('     🔍 Please wait...')
 
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            proc = subprocess.Popen(["./tool/JpegRecovery.exe", "temp_rp"], startupinfo=startupinfo)
+            proc = _run(["./tool/JpegRecovery.exe", "temp_rp"], wait=False)
             while proc.poll() is None:
-                QtWidgets.QApplication.processEvents()
+                QApplication.processEvents(); time.sleep(0.01)
 
             if os.path.exists("temp_rp.jpg"):
                 os.replace("temp_rp.jpg", "temp_rp")
@@ -537,32 +500,16 @@ class MainWindow:
         QShortcut(QKeySequence("Ctrl+0"), self.sr_edit_image, activated=cv.fit)
 
         # Value
-        self.im4g3 = self.ins3rt_d3l3t3 = ""
+        self.im4g3 = ""
 
-        if self.image: # Rút gọn bởi claude
-            time.sleep(1)
-            subprocess.run(['./tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
-
+        if self.image:
             self.im4g3 = self.image
-            img = Image.open(self.image).convert("RGB")
-            w, h = img.size
-            pix = QPixmap.fromImage(QImage(img.tobytes(), w, h, 3 * w, QImage.Format.Format_RGB888))
-
-            with open(self.image, "rb") as f: cv.set_pixmap(pix, jpeg_mcu(f.read()))
-            # uic_ei.sbox_pixel_w.setValue(w)
-            # uic_ei.sbox_pixel_h.setValue(h)
-
-
+            self._ei_load(self.image)
 
         # Rút gọn phần self đi
         uic_ei.b_Open.clicked.connect(self.EI_open)
         uic_ei.b_Save.clicked.connect(self.EI_save)
         uic_ei.b_View.clicked.connect(self.EI_view)
-
-        uic_ei.b_pos.clicked.connect(lambda: self.EI_view_mcu())
-
-        # uic_ei.b0x_d3l3t3.clicked.connect(self.EI_checkbox)
-        # uic_ei.b0x_ins3rt.clicked.connect(self.EI_checkbox)
 
         # Change num in slider
         uic_ei.slider_cr.valueChanged.connect(lambda v: uic_ei.l_cr.setText(f"{v}"))
@@ -582,109 +529,42 @@ class MainWindow:
 
 
 
+    # Hiển thị JPEG bytes lên canvas (kèm lưới MCU)
+    def _ei_show(self, raw):
+        if pm := to_pixmap(raw): self.uic_edit_image.label.set_pixmap(pm, jpeg_mcu(raw))
+
+
+    # Decode MCU log + hiển thị file
+    def _ei_load(self, path):
+        _run(['./tool/JpegDecomp.exe', '-decode', '-fin', path, '-fout', "log_mcu.txt"])
+        self._ei_show(Path(path).read_bytes())
+
+
     # Open File - D10M05Y26
     def EI_open(self):
-        self.im4g3 = QFileDialog.getOpenFileName(None, "Select File" , filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
-        # Delete File & clear
-        if os.path.exists("temp_img.JPG"): os.remove("temp_img.JPG")
+        self.im4g3 = QFileDialog.getOpenFileName(None, "Select File", filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
+        Path("temp_img.JPG").unlink(missing_ok=True)
         self.uic_edit_image.label.clear()
-
-        
-        # View
-        if self.im4g3:
-            subprocess.run(['./tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "Log_MCUs.txt"])
-            with open(self.im4g3, "rb") as f:
-                raw_data = f.read()
-
-            pixmap = self.read_image(raw_data[2:])
-
-            if pixmap:
-                self.uic_edit_image.label.set_pixmap(pixmap, jpeg_mcu(raw_data))
-                # w = pixmap.width(); h = pixmap.height()
-                # self.uic_edit_image.sbox_pixel_h.setValue(h)
-                # self.uic_edit_image.sbox_pixel_w.setValue(w)
+        if self.im4g3: self._ei_load(self.im4g3)
 
 
-
-    def EI_view_mcu(self):
-        self.mcu_viewer = MCUViewer()
-        self.mcu_viewer.show()
-
-
-        
     # View - D10M05Y26
     def EI_view(self):
-        # Quy đổi giá trị & gán vào biến
-        # Ex:       mcu_x = str(self.uic_edit_image.sbox_mcu_x.value())
-        ui = self.uic_edit_image # Code rút gọn
-        cr, cb, y = map(lambda s: str(s.value()), [ui.slider_cr, ui.slider_cb, ui.slider_y])
-        blocks, mcu_x, mcu_y = map(lambda s: str(s.value()), [ui.spinBox, ui.sbox_mcu_x, ui.sbox_mcu_y])
+        if not self.im4g3: return
+        ui, src = self.uic_edit_image, self.im4g3
+        v = lambda w: str(w.value())
 
+        if ui.b0x_d3l3t3_2.isChecked():  # xoá đoạn giữa 2 MCU trước khi repair
+            tags = [f"({x},{y})" for x, y in
+                    (map(int, t.text().split(',')) for t in (ui.le_mcu_xy_1, ui.le_mcu_xy_2))]
+            with open("log_mcu.txt", encoding="utf-8") as f:
+                delete_mcu(src, "temp_img_fixed.JPG", [l.strip() for l in f if any(t in l for t in tags)])
+            src = "temp_img_fixed.JPG"
 
-        self.ins3rt_d3l3t3 = "delete" if ui.radio1.isChecked() else "insert"
-
-        # pixel_h = str(self.uic_edit_image.sbox_pixel_h.value())
-        # pixel_w = str(self.uic_edit_image.sbox_pixel_w.value())
-
-        fil30 = "temp_img.JPG"
-        # Run JpegRepair
-        if self.im4g3:
-            if self.uic_edit_image.b0x_d3l3t3_2.isChecked():
-                mcux1, mcuy1 = [int(x.strip()) for x in self.uic_edit_image.le_mcu_xy_1.text().split(',')]
-                mcux2, mcuy2 = [int(x.strip()) for x in self.uic_edit_image.le_mcu_xy_2.text().split(',')]
-
-                print(f"Delete mcu {mcux1},{mcuy1} - {mcux2},{mcuy2}")
-                mcus = [f'{mcux1},{mcuy1}',f'{mcux2},{mcuy2}'] 
-                # Tim mcu va xoa doan do
-                matches = []
-                with open("log_mcu.txt", "r", encoding="utf-8") as f:
-                    for line in f:
-                        for num in mcus:
-                            if f"({num})" in line:
-                                matches.append(line.strip())
-
-                delete_mcu(self.im4g3, "temp_img_fixed.JPG", matches)
-                # time.sleep(3)
-
-                #                                                     file in        file out
-                if self.ins3rt_d3l3t3: pr0c = ["./tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-                else: pr0c = ["./tool/JpegRepair.exe", "temp_img_fixed.JPG", "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                subprocess.Popen(pr0c, startupinfo=startupinfo)   
-
-
-            else:
-                #                                                     file in        file out
-                if self.ins3rt_d3l3t3: pr0c = ["./tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "dest", mcu_y, mcu_x, self.ins3rt_d3l3t3, blocks, "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-                else: pr0c = ["./tool/JpegRepair.exe", self.im4g3, "temp_img.JPG", "cdelta",str(0), y, "cdelta",str(1), cb, "cdelta",str(2), cr]
-
-                startupinfo = subprocess.STARTUPINFO()
-                startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-                subprocess.Popen(pr0c, startupinfo=startupinfo)   
-                
-            time.sleep(1)
-            with open("temp_img.JPG", "rb") as f:
-                raw_data = f.read()
-
-            pixmap = QPixmap()
-            if not pixmap.loadFromData(raw_data, "JPEG"):
-                # Code beta
-                img = Image.open(BytesIO(raw_data)).convert("RGB")
-                w, h = img.size
-                qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
-                pixmap = QPixmap.fromImage(qimg)
-
-
-
-            # img = Image.open(BytesIO(raw_data)).convert("RGB")
-            # w, h = img.size
-            # qimg = QImage(img.tobytes(), w, h, QImage.Format.Format_RGB888)
-            # pixmap = QPixmap.fromImage(qimg)
-
-            # View
-            self.uic_edit_image.label.set_pixmap(pixmap, jpeg_mcu(raw_data))
+        mode = "delete" if ui.radio1.isChecked() else "insert"
+        cd = [a for i, w in enumerate((ui.slider_y, ui.slider_cb, ui.slider_cr)) for a in ("cdelta", str(i), v(w))]
+        _run(["./tool/JpegRepair.exe", src, "temp_img.JPG", "dest", v(ui.sbox_mcu_y), v(ui.sbox_mcu_x), mode, v(ui.spinBox), *cd])
+        if os.path.exists("temp_img.JPG"): self._ei_show(Path("temp_img.JPG").read_bytes())
 
 
 
