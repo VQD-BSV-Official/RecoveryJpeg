@@ -9,7 +9,7 @@ from pathlib import Path
 from PIL import Image, ImageFile  # Image processing
 
 from PyQt6.QtCore import Qt, QSize
-from PyQt6.QtGui import QPixmap, QIcon, QImage, QPainter, QFontMetrics, QPalette, QColor
+from PyQt6.QtGui import QShortcut, QKeySequence, QPixmap, QIcon, QImage, QPainter, QFontMetrics, QPalette, QColor
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
 # >>> CORE 🕵️ ───────────────────────────────
 from controllers.read_data import read_data
 from controllers.view_mcu import MCUViewer
+from controllers.image_canvas import ImageCanvas, jpeg_mcu
 from controllers.s0_decode import decode_jpeg
 from controllers.s3_delete import delete_mcu
 
@@ -522,7 +523,18 @@ class MainWindow:
         self.uic_edit_image.setupUi(self.sr_edit_image)
         self.sr_edit_image.show()
 
-        uic_ei = self.uic_edit_image        
+        uic_ei = self.uic_edit_image
+        cv = ImageCanvas()
+        uic_ei.mainLayout.replaceWidget(uic_ei.label, cv)
+        uic_ei.label.deleteLater(); uic_ei.label = cv
+
+        # Chọn MCU <-> spinbox; zoom (wheel, Ctrl +/-/0) không đụng MCU đã chọn
+        cv.selected.connect(lambda x, y: (uic_ei.sbox_mcu_x.setValue(x), uic_ei.sbox_mcu_y.setValue(y)))
+        for sb in (uic_ei.sbox_mcu_x, uic_ei.sbox_mcu_y):
+            sb.valueChanged.connect(lambda _: cv.set_sel(uic_ei.sbox_mcu_x.value(), uic_ei.sbox_mcu_y.value()))
+        for k, f in (("Ctrl++", 1.25), ("Ctrl+=", 1.25), ("Ctrl+-", 0.8)):
+            QShortcut(QKeySequence(k), self.sr_edit_image, activated=lambda f=f: cv.zoom(f))
+        QShortcut(QKeySequence("Ctrl+0"), self.sr_edit_image, activated=cv.fit)
 
         # Value
         self.im4g3 = self.ins3rt_d3l3t3 = ""
@@ -536,8 +548,7 @@ class MainWindow:
             w, h = img.size
             pix = QPixmap.fromImage(QImage(img.tobytes(), w, h, 3 * w, QImage.Format.Format_RGB888))
 
-            lb = uic_ei.label
-            lb.setPixmap(QPixmap.fromImage(self.view_label(lb.width(), lb.height(), pix)))
+            with open(self.image, "rb") as f: cv.set_pixmap(pix, jpeg_mcu(f.read()))
             # uic_ei.sbox_pixel_w.setValue(w)
             # uic_ei.sbox_pixel_h.setValue(h)
 
@@ -554,9 +565,9 @@ class MainWindow:
         # uic_ei.b0x_ins3rt.clicked.connect(self.EI_checkbox)
 
         # Change num in slider
-        uic_ei.slider_cr.valueChanged.connect(lambda v: uic_ei.l_cr.setText(f"Cr = {v}"))
-        uic_ei.slider_cb.valueChanged.connect(lambda v: uic_ei.l_cb.setText(f"Cb = {v}"))
-        uic_ei.slider_y.valueChanged.connect(lambda v: uic_ei.l_y.setText(f"Y = {v}"))
+        uic_ei.slider_cr.valueChanged.connect(lambda v: uic_ei.l_cr.setText(f"{v}"))
+        uic_ei.slider_cb.valueChanged.connect(lambda v: uic_ei.l_cb.setText(f"{v}"))
+        uic_ei.slider_y.valueChanged.connect(lambda v: uic_ei.l_y.setText(f"{v}"))
 
 
 
@@ -581,14 +592,14 @@ class MainWindow:
         
         # View
         if self.im4g3:
-            subprocess.run(['./tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "log_mcu.txt"])
+            subprocess.run(['./tool/JpegDecomp.exe', '-decode', '-fin', self.image, '-fout', "Log_MCUs.txt"])
             with open(self.im4g3, "rb") as f:
                 raw_data = f.read()
 
             pixmap = self.read_image(raw_data[2:])
 
             if pixmap:
-                self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
+                self.uic_edit_image.label.set_pixmap(pixmap, jpeg_mcu(raw_data))
                 # w = pixmap.width(); h = pixmap.height()
                 # self.uic_edit_image.sbox_pixel_h.setValue(h)
                 # self.uic_edit_image.sbox_pixel_w.setValue(w)
@@ -673,7 +684,7 @@ class MainWindow:
             # pixmap = QPixmap.fromImage(qimg)
 
             # View
-            self.uic_edit_image.label.setPixmap(QPixmap.fromImage(self.view_label(self.uic_edit_image.label.width(), self.uic_edit_image.label.height(), pixmap)))
+            self.uic_edit_image.label.set_pixmap(pixmap, jpeg_mcu(raw_data))
 
 
 
