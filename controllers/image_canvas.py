@@ -9,21 +9,6 @@ KEYS = {K.Key_Left: (-1, 0), K.Key_Comma: (-1, 0), K.Key_Less: (-1, 0),
         K.Key_Up: (0, -1), K.Key_Down: (0, 1)}
 
 
-def jpeg_mcu(d: bytes):
-    """(mcu_w, mcu_h) px từ sampling factor trong SOF; None nếu không parse được."""
-    i, n = 2, len(d)
-    while i + 4 <= n:
-        if d[i] != 0xFF: i += 1; continue
-        m = d[i + 1]
-        if m == 0xFF: i += 1; continue
-        if m in (0x01, 0xD8) or 0xD0 <= m <= 0xD7: i += 2; continue
-        if 0xC0 <= m <= 0xCF and m not in (0xC4, 0xC8, 0xCC):
-            hv = d[i + 11:i + 10 + 3 * d[i + 9]:3]
-            return (8 * max(b >> 4 for b in hv), 8 * max(b & 15 for b in hv)) if hv else None
-        if m == 0xDA: return None
-        i += 2 + int.from_bytes(d[i + 2:i + 4], "big")
-
-
 class ImageCanvas(QAbstractScrollArea):
     selected = pyqtSignal(int, int)  # mcu x, y
 
