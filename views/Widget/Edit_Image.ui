@@ -317,13 +317,6 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="3">
-          <widget class="QPushButton" name="b_pos">
-           <property name="text">
-            <string>pos...</string>
-           </property>
-          </widget>
-         </item>
          <item row="1" column="0">
           <widget class="QLabel" name="l_mcu_2">
            <property name="text">
@@ -443,7 +436,6 @@
   <tabstop>radio2</tabstop>
   <tabstop>sbox_mcu_x</tabstop>
   <tabstop>sbox_mcu_y</tabstop>
-  <tabstop>b_pos</tabstop>
   <tabstop>le_mcu_xy_1</tabstop>
   <tabstop>le_mcu_xy_2</tabstop>
   <tabstop>b0x_d3l3t3_2</tabstop>
