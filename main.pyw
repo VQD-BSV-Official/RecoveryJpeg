@@ -1,7 +1,8 @@
 # /////////////////////////////////////////////
 # >>> SYSTEM ⚙️ ──────────────────────────────
 import sys, os, subprocess, binascii, shutil, time
-from io import BytesIO
+from contextlib import redirect_stdout
+from io import BytesIO, StringIO
 from pathlib import Path
 
 # /////////////////////////////////////////////
@@ -21,7 +22,8 @@ from PyQt6.QtWidgets import (
 
 # /////////////////////////////////////////////
 # >>> CORE 🕵️ ───────────────────────────────
-from controllers.jpeg_tools import read_data, decode_jpeg, delete_mcu, jpeg_mcu
+from controllers.jpeg_tools import read_data, decode_jpeg, jpeg_mcu
+from controllers import MCUDecode, MCUSplice
 from controllers.image_canvas import ImageCanvas
 
 # /////////////////////////////////////////////
@@ -61,7 +63,7 @@ class MainWindow:
         self.uic.setupUi(self.main_win)
 
 
-        required = ["JpegDecomp.exe", "JpegRepair.exe", "JpegRecovery.exe"]
+        required = ["JpegRecovery.exe"]
         missing = [f for f in required if not (Path("tool") / f).is_file()]
 
         if missing:
@@ -70,8 +72,6 @@ class MainWindow:
                 + "\n".join(f"- {f}" for f in missing)
                 + "\n\nPlease add missing files or rebuild via Git Submodules.\n\n"
                 "Unavailable features:\n"
-                "- Decode image\n"
-                "- Insert/Delete Y, Cb, Cr\n"
                 "- Auto Recover JPEG"
             )
 
@@ -534,10 +534,20 @@ class MainWindow:
         if pm := to_pixmap(raw): self.uic_edit_image.label.set_pixmap(pm, jpeg_mcu(raw))
 
 
-    # Decode MCU log + hiển thị file
+    # Hiển thị file
     def _ei_load(self, path):
-        _run(['./tool/JpegDecomp.exe', '-decode', '-fin', path, '-fout', "log_mcu.txt"])
         self._ei_show(Path(path).read_bytes())
+
+
+    # MCUSplice src -> dst; log MCU (cắt bit) phải khớp src nên giải mã lại ngay trước khi cắt
+    def _splice(self, src, dst, x, y, action, n, adj, end=None):
+        data = Path(src).read_bytes()
+        if not adj:
+            MCUDecode.parse_jpeg(data, 0, len(data), os.path.join(os.path.dirname(os.path.abspath(src)), "Log_MCUs.txt"), False)
+        with redirect_stdout(buf := StringIO()):
+            out = MCUSplice.process(data, x, y, action, n, adj, src, end)
+        Path(dst).write_bytes(out)
+        # if msg := buf.getvalue().strip(): self.uic.textEdit.append(msg)
 
 
     # Open File - D10M05Y26
@@ -552,19 +562,18 @@ class MainWindow:
     def EI_view(self):
         if not self.im4g3: return
         ui, src = self.uic_edit_image, self.im4g3
-        v = lambda w: str(w.value())
+        try:
+            if ui.b0x_d3l3t3_2.isChecked():  # xoá đoạn giữa 2 MCU (gồm MCU cuối) trước khi insert/delete
+                (x1, y1), (x2, y2) = (map(int, t.text().split(',')) for t in (ui.le_mcu_xy_1, ui.le_mcu_xy_2))
+                self._splice(src, "temp_img_fixed.JPG", x1, y1, "delete", 1, {}, (x2, y2))
+                src = "temp_img_fixed.JPG"
 
-        if ui.b0x_d3l3t3_2.isChecked():  # xoá đoạn giữa 2 MCU trước khi repair
-            tags = [f"({x},{y})" for x, y in
-                    (map(int, t.text().split(',')) for t in (ui.le_mcu_xy_1, ui.le_mcu_xy_2))]
-            with open("log_mcu.txt", encoding="utf-8") as f:
-                delete_mcu(src, "temp_img_fixed.JPG", [l.strip() for l in f if any(t in l for t in tags)])
-            src = "temp_img_fixed.JPG"
-
-        mode = "delete" if ui.radio1.isChecked() else "insert"
-        cd = [a for i, w in enumerate((ui.slider_y, ui.slider_cb, ui.slider_cr)) for a in ("cdelta", str(i), v(w))]
-        _run(["./tool/JpegRepair.exe", src, "temp_img.JPG", "dest", v(ui.sbox_mcu_y), v(ui.sbox_mcu_x), mode, v(ui.spinBox), *cd])
-        if os.path.exists("temp_img.JPG"): self._ei_show(Path("temp_img.JPG").read_bytes())
+            adj = {i: (False, d) for i, w in enumerate((ui.slider_y, ui.slider_cb, ui.slider_cr)) if (d := w.value())}
+            self._splice(src, "temp_img.JPG", ui.sbox_mcu_x.value(), ui.sbox_mcu_y.value(),
+                         "delete" if ui.radio1.isChecked() else "insert", ui.spinBox.value(), adj)
+        except (MCUDecode.JpegError, MCUSplice.JpegError, ValueError, OSError) as e:
+            self.uic.textEdit.append(f"     ❌ {e}"); return
+        self._ei_show(Path("temp_img.JPG").read_bytes())
 
 
 
