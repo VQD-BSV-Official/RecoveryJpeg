@@ -18,6 +18,7 @@ from PyQt6.QtWidgets import (
     QListWidget,
     QListWidgetItem,
     QListView,
+    QMessageBox,
 )
 
 # /////////////////////////////////////////////
@@ -34,6 +35,19 @@ from views.Widget.Create import Ui_Create_New
 from views.Widget.Edit_Image import Ui_Edit_Image
 
 
+
+
+HD = Path("temp_hist").resolve()  # snapshot từng bước: {i}.JPG = kết quả sau lệnh thứ i (cả Log_MCUs.txt của chúng)
+_ERR = (MCUDecode.JpegError, MCUSplice.JpegError, ValueError, OSError)
+
+
+class EditWindow(QMainWindow):
+    """Cửa sổ Edit Image; on_close() -> False thì huỷ việc đóng."""
+    def __init__(self, on_close):
+        super().__init__(); self._on_close = on_close
+
+    def closeEvent(self, e):
+        e.accept() if self._on_close() else e.ignore()
 
 
 def _run(args, wait=True):
@@ -481,7 +495,7 @@ class MainWindow:
 # ════════════════════════════════════════════════════════════════════════════════════════════════════
     # Edit Image - D10M05Y26
     def show_image_editor(self):
-        self.sr_edit_image = QMainWindow()
+        self.sr_edit_image = EditWindow(self._ei_close)
         self.uic_edit_image = Ui_Edit_Image()
         self.uic_edit_image.setupUi(self.sr_edit_image)
         self.sr_edit_image.show()
@@ -501,6 +515,9 @@ class MainWindow:
 
         # Value
         self.im4g3 = ""
+        self.hist = []  # (lệnh, log MCUSplice); lệnh = (rng, x, y, act, n, adj)
+        self._ei_saved = False
+        HD.mkdir(exist_ok=True)
 
         if self.image:
             self.im4g3 = self.image
@@ -510,6 +527,14 @@ class MainWindow:
         uic_ei.b_Open.clicked.connect(self.EI_open)
         uic_ei.b_Save.clicked.connect(self.EI_save)
         uic_ei.b_View.clicked.connect(self.EI_view)
+        uic_ei.b_Remove.clicked.connect(self.EI_remove)
+        QShortcut(QKeySequence("Ctrl+Z"), self.sr_edit_image, activated=self.EI_remove)
+        uic_ei.b_Reset.clicked.connect(self.EI_reset)
+
+        # Delete/Insert: vẫn loại trừ nhau nhưng click lần nữa là bỏ chọn
+        for r, o in ((uic_ei.radio1, uic_ei.radio2), (uic_ei.radio2, uic_ei.radio1)):
+            r.setAutoExclusive(False)
+            r.toggled.connect(lambda c, o=o: c and o.setChecked(False))
 
         # Change num in slider
         uic_ei.slider_cr.valueChanged.connect(lambda v: uic_ei.l_cr.setText(f"{v}"))
@@ -523,8 +548,23 @@ class MainWindow:
     # Save - D10M05Y26
     def EI_save(self):
         # Replace - Cho phép di chuyển khi các phân vùng
+        if not self.hist: return False
         save_file = QFileDialog.getSaveFileName(None, "Save File", "" ,filter='JPEG files (*.JPG);; All files (*)')[0]
-        if save_file and os.path.exists("temp_img.JPG"): shutil.copy("temp_img.JPG", save_file)
+        if not save_file: return False
+        shutil.copy(self._ei_cur(), save_file)
+        self._ei_saved = True
+        self._ei_msg(f"💾 Saved >> {os.path.basename(save_file)}")
+        return True
+
+
+    # Đóng cửa sổ: hỏi lưu nếu còn thay đổi chưa lưu; Cancel thì giữ nguyên, ngược lại xoá file temp
+    def _ei_close(self):
+        if self.hist and not self._ei_saved:
+            B = QMessageBox.StandardButton
+            r = QMessageBox.question(self.sr_edit_image, "Edit Image", "You have unsaved changes.\nSave before closing?", B.Save | B.Discard | B.Cancel, B.Save)
+            if r == B.Cancel or (r == B.Save and not self.EI_save()): return False
+        shutil.rmtree(HD, ignore_errors=True)
+        return True
 
 
 
@@ -547,33 +587,100 @@ class MainWindow:
         with redirect_stdout(buf := StringIO()):
             out = MCUSplice.process(data, x, y, action, n, adj, src, end)
         Path(dst).write_bytes(out)
-        # if msg := buf.getvalue().strip(): self.uic.textEdit.append(msg)
+        return buf.getvalue().strip()
 
 
     # Open File - D10M05Y26
     def EI_open(self):
         self.im4g3 = QFileDialog.getOpenFileName(None, "Select File", filter='JPEG files (*.JPEG *.JPG);;All files (*)')[0]
-        Path("temp_img.JPG").unlink(missing_ok=True)
+        self.hist.clear(); self.uic_edit_image.list_hist.clear()
         self.uic_edit_image.label.clear()
         if self.im4g3: self._ei_load(self.im4g3)
 
 
-    # View - D10M05Y26
+    # State hiện tại: file sau lệnh cuối (hoặc ảnh gốc)
+    def _ei_cur(self):
+        return str(HD / f"{len(self.hist)}.JPG") if self.hist else self.im4g3
+
+
+    # Log trạng thái ngay trong cửa sổ Edit Image (status bar); lỗi ghi thêm vào log chính
+    def _ei_msg(self, s, err=False):
+        self.sr_edit_image.statusBar().showMessage(s, 10000)
+        if err: self.uic.textEdit.append(f"     {s}")
+
+
+    # Áp lệnh a lên state hiện tại -> state mới; hist lưu (lệnh, log của MCUSplice)
+    def _ei_apply(self, a):
+        rng, x, y, act, n, adj = a
+        src, dst = self._ei_cur(), str(HD / f"{len(self.hist) + 1}.JPG")
+        go, logs = act or adj, []  # còn bước insert/delete/adjust sau khi cắt đoạn?
+        if rng:  # xoá đoạn giữa 2 MCU (gồm MCU cuối) trước
+            tmp = str(HD / "fix.JPG") if go else dst
+            logs.append(self._splice(src, tmp, rng[0], rng[1], "delete", 1, {}, rng[2:])); src = tmp
+        if go: logs.append(self._splice(src, dst, x, y, act, n, adj))
+        self.hist.append((a, "\n".join(filter(None, logs)))); self._ei_saved = False
+
+
+    # Các phần mô tả của 1 lệnh: cắt đoạn / insert-delete / chỉnh màu
+    @staticmethod
+    def _ei_parts(a):
+        rng, x, y, act, n, adj = a
+        p = []
+        if rng: p.append(f"Cut ({rng[0]},{rng[1]})→({rng[2]},{rng[3]})")
+        if act: p.append(f"{act.title()} ×{n} @ ({x},{y})")
+        if adj: p.append("Adjust " + " ".join(f"{c}{adj[k][1]:+d}" for k, c in enumerate(("Y", "Cb", "Cr")) if k in adj) + ("" if act else f" @ ({x},{y}) → end"))
+        return p
+
+
+    def _ei_refresh(self):
+        lw = self.uic_edit_image.list_hist
+        lw.clear()
+        for i, (a, log) in enumerate(self.hist, 1):
+            p = self._ei_parts(a)
+            it = QListWidgetItem(f"#{i}  {p[0]}" + (f"\n      {' · '.join(p[1:])}" if p[1:] else ""))
+            it.setToolTip("\n".join(p + [f"{(HD / f'{i}.JPG').stat().st_size:,} B"] + ([log] if log else [])))
+            lw.addItem(it)
+        lw.scrollToBottom()
+        if self.hist or self.im4g3: self._ei_load(self._ei_cur())
+
+
+    # View - D10M05Y26 (áp dụng chồng lên kết quả trước đó)
     def EI_view(self):
         if not self.im4g3: return
-        ui, src = self.uic_edit_image, self.im4g3
+        ui = self.uic_edit_image
         try:
-            if ui.b0x_d3l3t3_2.isChecked():  # xoá đoạn giữa 2 MCU (gồm MCU cuối) trước khi insert/delete
-                (x1, y1), (x2, y2) = (map(int, t.text().split(',')) for t in (ui.le_mcu_xy_1, ui.le_mcu_xy_2))
-                self._splice(src, "temp_img_fixed.JPG", x1, y1, "delete", 1, {}, (x2, y2))
-                src = "temp_img_fixed.JPG"
-
+            rng = tuple(int(v) for t in (ui.le_mcu_xy_1, ui.le_mcu_xy_2) for v in t.text().split(',')) if ui.b0x_d3l3t3_2.isChecked() else None
             adj = {i: (False, d) for i, w in enumerate((ui.slider_y, ui.slider_cb, ui.slider_cr)) if (d := w.value())}
-            self._splice(src, "temp_img.JPG", ui.sbox_mcu_x.value(), ui.sbox_mcu_y.value(),
-                         "delete" if ui.radio1.isChecked() else "insert", ui.spinBox.value(), adj)
-        except (MCUDecode.JpegError, MCUSplice.JpegError, ValueError, OSError) as e:
-            self.uic.textEdit.append(f"     ❌ {e}"); return
-        self._ei_show(Path("temp_img.JPG").read_bytes())
+            n = ui.spinBox.value()  # không chọn Delete/Insert (hoặc Blocks = 0) -> bỏ qua insert/delete
+            act = ("delete" if ui.radio1.isChecked() else "insert" if ui.radio2.isChecked() else None) if n else None
+            if not (rng or adj or act): return self._ei_msg("⚠ Nothing to apply")
+            self._ei_apply((rng, ui.sbox_mcu_x.value(), ui.sbox_mcu_y.value(), act, n if act else 0, adj))
+        except _ERR as e:
+            return self._ei_msg(f"❌ {e}", True)
+        self._ei_refresh()
+        self._ei_msg(f"✅ #{len(self.hist)}  " + " · ".join(self._ei_parts(self.hist[-1][0])))
+
+
+    # Xoá lệnh đang chọn (mặc định lệnh cuối); các lệnh sau nó được chạy lại
+    def EI_remove(self):
+        lw = self.uic_edit_image.list_hist
+        if (k := lw.currentRow() if lw.currentRow() >= 0 else len(self.hist) - 1) < 0: return
+        rest = [a for a, _ in self.hist[k + 1:]]; del self.hist[k:]; self._ei_saved = False
+        for a in rest:
+            try: self._ei_apply(a)
+            except _ERR as e:
+                self._ei_msg(f"❌ Replay: {e} (dropped later steps)", True); break
+        else: self._ei_msg(f"↩ Removed #{k + 1}")
+        self._ei_refresh()
+
+
+    # Reset mọi tham số về 0; ảnh và log (hist) giữ nguyên
+    def EI_reset(self):
+        u = self.uic_edit_image
+        for w in (u.slider_y, u.slider_cb, u.slider_cr, u.spinBox, u.sbox_mcu_x, u.sbox_mcu_y): w.setValue(0)
+        for w in (u.radio1, u.radio2, u.b0x_d3l3t3_2): w.setChecked(False)
+        for w in (u.le_mcu_xy_1, u.le_mcu_xy_2): w.setText("0, 0")
+        self._ei_msg("↺ Parameters reset")
 
 
 

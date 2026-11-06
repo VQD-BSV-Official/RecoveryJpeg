@@ -24,7 +24,7 @@
     <normaloff>Logo/logo.ico</normaloff>Logo/logo.ico</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="mainLayout" stretch="1,0">
+   <layout class="QHBoxLayout" name="mainLayout" stretch="1,0,0">
     <property name="spacing">
      <number>10</number>
     </property>
@@ -421,7 +421,74 @@
          </item>
         </layout>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="buttonsLayout2">
+         <item>
+          <widget class="QPushButton" name="b_Remove">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Remove</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="b_Reset">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>30</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>Reset</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QListWidget" name="list_hist">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>190</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>190</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="toolTip">
+       <string>Lịch sử lệnh (Ctrl+Z / Remove: xoá lệnh đang chọn, mặc định lệnh cuối)</string>
+      </property>
      </widget>
     </item>
    </layout>
