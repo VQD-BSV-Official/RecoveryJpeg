@@ -85,6 +85,6 @@ python "main.pyw"
 
 
 ## Usage - 🎬 Demo Video
-<a href="https://youtu.be/oKuoWYz6NP8">
-  <img src="https://img.youtube.com/vi/oKuoWYz6NP8/maxresdefault.jpg" width="600">
+<a href="https://youtu.be/Y71KwogXW8s">
+  <img src="https://img.youtube.com/vi/Y71KwogXW8s/maxresdefault.jpg" width="600">
 </a>
