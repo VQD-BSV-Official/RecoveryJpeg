@@ -62,5 +62,5 @@ class Ui_About(object):
 "li.unchecked::marker { content: \"\\2610\"; }\n"
 "li.checked::marker { content: \"\\2612\"; }\n"
 "</style></head><body style=\" font-family:\'Segoe UI\'; font-size:9pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">RecoveryJpeg uses other tools such as JpegRepair, JpegRecovery, JpegDecomp, Irfan. The software was created for the purpose of restoring photos.</span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:10pt;\">RecoveryJpeg uses other tools such as JpegRecovery, Irfan. The software was created for the purpose of restoring photos.</span></p></body></html>"))
         self.b_OK.setText(_translate("About", "OK"))
