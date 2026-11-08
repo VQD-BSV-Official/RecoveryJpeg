@@ -104,5 +104,8 @@ python "main.pyw"
 > Email me for paid file-recovery requests (fees apply). Questions and issues will be answered as soon as possible.
 
 <a href="https://youtu.be/Y71KwogXW8s">
-  <img src="https://img.youtube.com/vi/Y71KwogXW8s/maxresdefault.jpg" width="600">
+  <img src="https://img.youtube.com/vi/Y71KwogXW8s/maxresdefault.jpg" width="400">
+</a>
+<a href="https://youtu.be/oKuoWYz6NP8">
+  <img src="https://img.youtube.com/vi/oKuoWYz6NP8/maxresdefault.jpg" width="400">
 </a>
